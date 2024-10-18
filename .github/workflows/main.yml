@@ -1,0 +1,39 @@
+name: wha7
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run Python Script
+      # Inject secrets into the environment
+      env:
+        EBAY_AFFILIATE_ID: ${{ secrets.EBAY_AFFILIATE_ID }}
+        TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+        TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+        TWILIO_NUMBER: ${{ secrets.TWILIO_NUMBER }}
+        CLARIFAI_PAT: ${{ secrets.CLARIFAI_PAT }}
+        FOLDER_PATH: ${{ secrets.FOLDER_PATH }}
+        CONCEPT_PATH: ${{ secrets.CONCEPT_PATH }}
+        THRESHOLD: ${{ secrets.THRESHOLD }}
+        S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+        EBAY_API_ENDPOINT: ${{ secrets.EBAY_API_ENDPOINT }}
+        EBAY_APP_ID: ${{ secrets.EBAY_APP_ID }}
+        EBAY_DEV_ID: ${{ secrets.EBAY_DEV_ID }}
+        EBAY_CERT_ID: ${{ secrets.EBAY_CERT_ID }}
+      run: |
+        streamlit_app.py
