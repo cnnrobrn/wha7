@@ -23,6 +23,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Run Streamlit App
       # Inject secrets into the environment
       env:
         EBAY_AFFILIATE_ID: ${{ secrets.EBAY_AFFILIATE_ID }}
@@ -38,3 +39,5 @@ jobs:
         EBAY_APP_ID: ${{ secrets.EBAY_APP_ID }}
         EBAY_DEV_ID: ${{ secrets.EBAY_DEV_ID }}
         EBAY_CERT_ID: ${{ secrets.EBAY_CERT_ID }}
+      run: |
+        streamlit run streamlit_app.py  # Make sure to run your Streamlit app here
