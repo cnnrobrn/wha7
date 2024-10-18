@@ -1,6 +1,10 @@
 name: wha7
 
-on: [push]
+on:
+  push:
+    paths:
+      - 'streamlit_app.py'  # Trigger the workflow when streamlit_app.py is pushed or modified
+  workflow_dispatch:  # Allow manual trigger of the workflow from GitHub UI
 
 jobs:
   build:
@@ -19,7 +23,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Run Python Script
+    - name: Run Streamlit App
       # Inject secrets into the environment
       env:
         EBAY_AFFILIATE_ID: ${{ secrets.EBAY_AFFILIATE_ID }}
@@ -36,4 +40,4 @@ jobs:
         EBAY_DEV_ID: ${{ secrets.EBAY_DEV_ID }}
         EBAY_CERT_ID: ${{ secrets.EBAY_CERT_ID }}
       run: |
-        streamlit_app.py
+        streamlit run streamlit_app.py  # Use the 'streamlit run' command to run the app
