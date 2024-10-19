@@ -32,6 +32,8 @@ EBAY_API_ENDPOINT = st.secrets["EBAY_API_ENDPOINT"]
 EBAY_APP_ID = st.secrets["EBAY_APP_ID"]
 EBAY_DEV_ID = st.secrets["EBAY_DEV_ID"]
 EBAY_CERT_ID = st.secrets["EBAY_CERT_ID"]
+AWS_ACCESS_KEY_ID = st.secrets["AWS_ACCESS_KEY_ID"] 
+AWS_SECRET_ACCESS_KEY = st.secrets["AWS_SECRET_ACCESS_KEY"]
 
 # Mapping of concepts to eBay category IDs
 CONCEPT_TO_CATEGORY = {
