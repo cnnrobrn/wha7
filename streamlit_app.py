@@ -14,10 +14,6 @@ import shutil
 import json
 import time
 
-
-
-import os
-
 # Fetch secrets from environment variables
 EBAY_AFFILIATE_ID = st.secrets["EBAY_AFFILIATE_ID"]
 TWILIO_ACCOUNT_SID = st.secrets["TWILIO_ACCOUNT_SID"]
@@ -272,6 +268,7 @@ def download_media(media_list, from_number, msg_sid):
 
 def save_media(response, from_number, msg_sid, media_index):
     content_type = response.headers['Content-Type']
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
     extension = "png" if "image" in content_type else content_type.split('/')[1]
     file_path = os.path.join(FOLDER_PATH, from_number, f"{msg_sid}_{media_index}.{extension}")
     file_name = file_path.split('/')[-1]
