@@ -19,23 +19,19 @@ import time
 import os
 
 # Fetch secrets from environment variables
-EBAY_AFFILIATE_ID = os.getenv("EBAY_AFFILIATE_ID")
-TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
-TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
-TWILIO_NUMBER = os.getenv("TWILIO_NUMBER")
-CLARIFAI_PAT = os.getenv("CLARIFAI_PAT")
-FOLDER_PATH = os.getenv("FOLDER_PATH")
-CONCEPT_PATH = os.getenv("CONCEPT_PATH")
+EBAY_AFFILIATE_ID = st.secrets["EBAY_AFFILIATE_ID"]
+TWILIO_ACCOUNT_SID = st.secrets["TWILIO_ACCOUNT_SID"]
+TWILIO_AUTH_TOKEN = st.secrets["TWILIO_AUTH_TOKEN"]
+TWILIO_NUMBER = st.secrets["TWILIO_NUMBER"]
+CLARIFAI_PAT = st.secrets["CLARIFAI_PAT"]
+FOLDER_PATH = st.secrets["FOLDER_PATH"]
+CONCEPT_PATH = st.secrets["CONCEPT_PATH"]
 THRESHOLD = .8  # Default to 0.8 if not set
-S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
-EBAY_API_ENDPOINT = os.getenv("EBAY_API_ENDPOINT")
-EBAY_APP_ID = os.getenv("EBAY_APP_ID")
-EBAY_DEV_ID = os.getenv("EBAY_DEV_ID")
-EBAY_CERT_ID = os.getenv("EBAY_CERT_ID")
-
-# Example of using the secrets
-print(f"EBAY_AFFILIATE_ID: {EBAY_AFFILIATE_ID}")
-print(f"TWILIO_ACCOUNT_SID: {TWILIO_ACCOUNT_SID}")
+S3_BUCKET_NAME = st.secrets["S3_BUCKET_NAME"]
+EBAY_API_ENDPOINT = st.secrets["EBAY_API_ENDPOINT"]
+EBAY_APP_ID = st.secrets["EBAY_APP_ID"]
+EBAY_DEV_ID = st.secrets["EBAY_DEV_ID"]
+EBAY_CERT_ID = st.secrets["EBAY_CERT_ID"]
 
 # Mapping of concepts to eBay category IDs
 CONCEPT_TO_CATEGORY = {
