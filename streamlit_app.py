@@ -14,7 +14,8 @@ import shutil
 import json
 import time
 
-# Fetch secrets from environment variables
+
+# Fetch secrets from st.secrets
 EBAY_AFFILIATE_ID = st.secrets["EBAY_AFFILIATE_ID"]
 TWILIO_ACCOUNT_SID = st.secrets["TWILIO_ACCOUNT_SID"]
 TWILIO_AUTH_TOKEN = st.secrets["TWILIO_AUTH_TOKEN"]
