@@ -556,72 +556,93 @@ def send_results_via_twilio(client, to_number, concepts):
 
 
 
-# Main
-if __name__ == "__main__":
-    # Initialize clients and models
-    client = init_twilio_client()
-    detector_model = init_clarifai_model(CLARIFAI_PAT)
-    label_model = init_clarifai_labels(CLARIFAI_PAT)
+# Global variable to store the last processed message SID
+last_processed_sid = None
 
-    # Obtain eBay OAuth token
-    EBAY_ACCESS_TOKEN = ebay_oauth_flow()
+def background_processing():
+    global last_processed_sid
+    while True:
+        try:
+            # Initialize clients and models
+            client = init_twilio_client()
+            detector_model = init_clarifai_model(CLARIFAI_PAT)
+            label_model = init_clarifai_labels(CLARIFAI_PAT)
 
-    # Process messages and extract images
-    message_data = process_twilio_messages(client, TWILIO_NUMBER)
+            # Obtain eBay OAuth token
+            EBAY_ACCESS_TOKEN = ebay_oauth_flow()
 
-    if not message_data:
-        st.error("No messages with media to process.")
-    else:
-        # Get the phone number from the message_data
-        user_phone = list(message_data.keys())[0]
+            # Get the most recent message
+            messages = client.messages.list(to=TWILIO_NUMBER, limit=1)
+            if messages and messages[0].sid != last_processed_sid and int(messages[0].num_media) > 0:
+                # Process the new message
+                from_number = messages[0].from_
+                process_incoming_message(from_number, int(messages[0].num_media), client, detector_model, label_model, EBAY_ACCESS_TOKEN)
+                last_processed_sid = messages[0].sid
 
-        # List image paths for the user
-        image_data = list_image_paths(FOLDER_PATH, user_phone)
-        url_image_data = s3_write_urls(image_data)
-        st.success("Written to S3", icon="✅")
-                   
-        # Analyze images using Clarifai model
-        prediction_responses = analyze_images(url_image_data, detector_model)
-        st.success("Predictions generated", icon="✅")
-        
+        except Exception as e:
+            st.error(f"Error in background processing: {str(e)}")
 
-        # User interaction
-        st.write(f"Processing images from phone number: {user_phone}")
-        user_concepts = extract_user_concepts(prediction_responses, user_phone)
-        st.success("Concepts analyzed", icon="✅")
+        # Wait for 60 seconds before checking again
+        time.sleep(60)
 
-        tagged_concepts=add_tags(user_concepts,label_model)
-        st.success("Concepts tagged", icon="✅")
+def process_incoming_message(from_number, num_media, client, detector_model, label_model, EBAY_ACCESS_TOKEN):
+    # Download and process the media
+    media_urls, file_paths, file_names = download_media(client.messages.list(to=TWILIO_NUMBER, from_=from_number)[0].media.list(), from_number, client.messages.list(to=TWILIO_NUMBER, from_=from_number)[0].sid)
 
-        # Send user concepts to eBay Vision Search API and get top 3 links
-        if tagged_concepts:
-            tagged_concepts = search_ebay_with_concepts(tagged_concepts, EBAY_ACCESS_TOKEN,EBAY_AFFILIATE_ID)
-            st.write("eBay Search Results:")
-            for concept in tagged_concepts:
-                concept_name = concept['concept_name']
-                st.write(f"Top 3 eBay links for concept '{concept_name}':")
-                st.write(concept)
-                # Display concept image and links in columns
-                col1, col2 = st.columns([1, 3])
-                with col1:
-                    # Display concept image
-                    st.image(concept['concept_image'], caption=concept_name, use_column_width=True)
-                with col2:
-                    # Display top 3 links
-                    top_links = concept.get('top_links', [])
-                    if top_links:
-                        for link in top_links:
-                            st.markdown(f"- [eBay Item Link]({link})")
-                    else:
-                        st.write("No links found.")
-            send_results_via_twilio(client, user_phone, tagged_concepts)
+    # List image paths for the user
+    image_data = [{"phone_number": from_number, "image_path": path, "url": ""} for path in file_paths]
+    url_image_data = s3_write_urls(image_data)
+
+    # Analyze images using Clarifai model
+    prediction_responses = analyze_images(url_image_data, detector_model)
+
+    # Extract user concepts
+    user_concepts = extract_user_concepts(prediction_responses, from_number)
+
+    # Tag concepts
+    tagged_concepts = add_tags(user_concepts, label_model)
+
+    # Search eBay with concepts
+    if tagged_concepts:
+        tagged_concepts = search_ebay_with_concepts(tagged_concepts, EBAY_ACCESS_TOKEN, EBAY_AFFILIATE_ID)
+        send_results_via_twilio(client, from_number, tagged_concepts)
+
+    # Clean up temporary files
+    delete_photos(FOLDER_PATH)
+
+    # Update Streamlit UI
+    st.success(f"Processed new message from {from_number}")
+    st.write("Concepts found:")
+    for concept in tagged_concepts:
+        st.write(f"- {concept['concept_name']}")
+
+# ... (keep all the existing functions)
+
+def main():
+    st.title("Twilio Image Processing App")
+
+    # Start background processing in a separate thread
+    background_thread = threading.Thread(target=background_processing, daemon=True)
+    background_thread.start()
+
+    st.write("Waiting for new messages...")
+
+    # Add any additional Streamlit UI elements here
+    if st.button("Process Latest Message Manually"):
+        # Similar logic to background_processing, but for manual triggering
+        client = init_twilio_client()
+        detector_model = init_clarifai_model(CLARIFAI_PAT)
+        label_model = init_clarifai_labels(CLARIFAI_PAT)
+        EBAY_ACCESS_TOKEN = ebay_oauth_flow()
+        messages = client.messages.list(to=TWILIO_NUMBER, limit=1)
+        if messages and int(messages[0].num_media) > 0:
+            from_number = messages[0].from_
+            process_incoming_message(from_number, int(messages[0].num_media), client, detector_model, label_model, EBAY_ACCESS_TOKEN)
         else:
-            st.write("No concepts extracted from the image.")
+            st.warning("No new messages with media to process.")
 
-    # In the main section, after processing the concepts and eBay links:
-
-        
-
+if __name__ == "__main__":
+    main()
 
     # Delete photos at the end of the program
     delete_photos(FOLDER_PATH)
