@@ -632,4 +632,4 @@ if __name__ == "__main__":
     # Start the image processing in a separate thread
     thread = threading.Thread(target=process_images)
     thread.start()
-    )
+    
