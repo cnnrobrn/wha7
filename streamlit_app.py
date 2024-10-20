@@ -13,8 +13,6 @@ import re
 import shutil
 import json
 import time
-import threading
-
 
 
 # Fetch secrets from st.secrets
@@ -555,64 +553,7 @@ def send_results_via_twilio(client, to_number, concepts):
         st.error(f"Failed to send SMS: {str(e)}")
 
 
-def process_images():
-        while True:
-            # Process messages and extract images
-            message_data = process_twilio_messages(client, TWILIO_NUMBER)
 
-            if not message_data:
-                st.error("No messages with media to process.")
-            else:
-                # Get the phone number from the message_data
-                user_phone = list(message_data.keys())[0]
-
-                # List image paths for the user
-                image_data = list_image_paths(FOLDER_PATH, user_phone)
-                url_image_data = s3_write_urls(image_data)
-                st.success("Written to S3", icon="✅")
-
-                # Analyze images using Clarifai model
-                prediction_responses = analyze_images(url_image_data, detector_model)
-                st.success("Predictions generated", icon="✅")
-
-                # User interaction
-                st.write(f"Processing images from phone number: {user_phone}")
-                user_concepts = extract_user_concepts(prediction_responses, user_phone)
-                st.success("Concepts analyzed", icon="✅")
-
-                tagged_concepts = add_tags(user_concepts, label_model)
-                st.success("Concepts tagged", icon="✅")
-
-                # Send user concepts to eBay Vision Search API and get top 3 links
-                if tagged_concepts:
-                    tagged_concepts = search_ebay_with_concepts(tagged_concepts, EBAY_ACCESS_TOKEN, EBAY_AFFILIATE_ID)
-                    st.write("eBay Search Results:")
-                    for concept in tagged_concepts:
-                        concept_name = concept['concept_name']
-                        st.write(f"Top 3 eBay links for concept '{concept_name}':")
-                        st.write(concept)
-                        # Display concept image and links in columns
-                        col1, col2 = st.columns([1, 3])
-                        with col1:
-                            # Display concept image
-                            st.image(concept['concept_image'], caption=concept_name, use_column_width=True)
-                        with col2:
-                            # Display top 3 links
-                            top_links = concept.get('top_links', [])
-                            if top_links:
-                                for link in top_links:
-                                    st.markdown(f"- [eBay Item Link]({link})")
-                            else:
-                                st.write("No links found.")
-                    send_results_via_twilio(client, user_phone, tagged_concepts)
-                else:
-                    st.write("No concepts extracted from the image.")
-
-            # Delete photos at the end of the processing
-            delete_photos(FOLDER_PATH)
-
-            # Wait for 15 seconds before checking for new messages
-            time.sleep(15)
 
 
 # Main
@@ -627,5 +568,60 @@ if __name__ == "__main__":
 
     # Process messages and extract images
     message_data = process_twilio_messages(client, TWILIO_NUMBER)
-    process_images()
-    
+
+    if not message_data:
+        st.error("No messages with media to process.")
+    else:
+        # Get the phone number from the message_data
+        user_phone = list(message_data.keys())[0]
+
+        # List image paths for the user
+        image_data = list_image_paths(FOLDER_PATH, user_phone)
+        url_image_data = s3_write_urls(image_data)
+        st.success("Written to S3", icon="✅")
+
+        # Analyze images using Clarifai model
+        prediction_responses = analyze_images(url_image_data, detector_model)
+        st.success("Predictions generated", icon="✅")
+
+
+        # User interaction
+        st.write(f"Processing images from phone number: {user_phone}")
+        user_concepts = extract_user_concepts(prediction_responses, user_phone)
+        st.success("Concepts analyzed", icon="✅")
+
+        tagged_concepts=add_tags(user_concepts,label_model)
+        st.success("Concepts tagged", icon="✅")
+
+        # Send user concepts to eBay Vision Search API and get top 3 links
+        if tagged_concepts:
+            tagged_concepts = search_ebay_with_concepts(tagged_concepts, EBAY_ACCESS_TOKEN,EBAY_AFFILIATE_ID)
+            st.write("eBay Search Results:")
+            for concept in tagged_concepts:
+                concept_name = concept['concept_name']
+                st.write(f"Top 3 eBay links for concept '{concept_name}':")
+                st.write(concept)
+                # Display concept image and links in columns
+                col1, col2 = st.columns([1, 3])
+                with col1:
+                    # Display concept image
+                    st.image(concept['concept_image'], caption=concept_name, use_column_width=True)
+                with col2:
+                    # Display top 3 links
+                    top_links = concept.get('top_links', [])
+                    if top_links:
+                        for link in top_links:
+                            st.markdown(f"- [eBay Item Link]({link})")
+                    else:
+                        st.write("No links found.")
+            send_results_via_twilio(client, user_phone, tagged_concepts)
+        else:
+            st.write("No concepts extracted from the image.")
+
+    # In the main section, after processing the concepts and eBay links:
+
+
+
+
+    # Delete photos at the end of the program
+    delete_photos(FOLDER_PATH)
