@@ -567,6 +567,7 @@ def main():
 
     if not message_data:
         st.error("No messages with media to process.")
+        return ""
     else:
         # Get the phone number from the message_data
         user_phone = list(message_data.keys())[0]
@@ -613,6 +614,7 @@ def main():
             send_results_via_twilio(client, user_phone, tagged_concepts)
         else:
             st.write("No concepts extracted from the image.")
+        return list(message_data.values())[0]
 
     # In the main section, after processing the concepts and eBay links:
 
@@ -626,6 +628,10 @@ def main():
 
 # Main
 if __name__ == "__main__":
+    other_data = process_twilio_messages(client, TWILIO_NUMBER)
+    message_data = list(other_data.values())[0]
+    last_message = ""
     while True:
-        main()
-
+        if message_data != last_message:
+            last_message = main()
+            message_data = last_message
