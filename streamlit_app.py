@@ -628,8 +628,4 @@ if __name__ == "__main__":
 
             # Wait for 15 seconds before checking for new messages
             time.sleep(15)
-
-    # Start the image processing in a separate thread
-    thread = threading.Thread(target=process_images)
-    thread.start()
     
