@@ -553,11 +553,7 @@ def send_results_via_twilio(client, to_number, concepts):
         st.error(f"Failed to send SMS: {str(e)}")
 
 
-
-
-
-# Main
-if __name__ == "__main__":
+def main():
     # Initialize clients and models
     client = init_twilio_client()
     detector_model = init_clarifai_model(CLARIFAI_PAT)
@@ -625,3 +621,11 @@ if __name__ == "__main__":
 
     # Delete photos at the end of the program
     delete_photos(FOLDER_PATH)
+
+
+
+# Main
+if __name__ == "__main__":
+    while True:
+        main()
+
