@@ -555,22 +555,7 @@ def send_results_via_twilio(client, to_number, concepts):
         st.error(f"Failed to send SMS: {str(e)}")
 
 
-
-
-
-# Main
-if __name__ == "__main__":
-    # Initialize clients and models
-    client = init_twilio_client()
-    detector_model = init_clarifai_model(CLARIFAI_PAT)
-    label_model = init_clarifai_labels(CLARIFAI_PAT)
-
-    # Obtain eBay OAuth token
-    EBAY_ACCESS_TOKEN = ebay_oauth_flow()
-
-    # Process messages and extract images
-    message_data = process_twilio_messages(client, TWILIO_NUMBER)
-    def process_images():
+def process_images():
         while True:
             # Process messages and extract images
             message_data = process_twilio_messages(client, TWILIO_NUMBER)
@@ -628,4 +613,19 @@ if __name__ == "__main__":
 
             # Wait for 15 seconds before checking for new messages
             time.sleep(15)
+
+
+# Main
+if __name__ == "__main__":
+    # Initialize clients and models
+    client = init_twilio_client()
+    detector_model = init_clarifai_model(CLARIFAI_PAT)
+    label_model = init_clarifai_labels(CLARIFAI_PAT)
+
+    # Obtain eBay OAuth token
+    EBAY_ACCESS_TOKEN = ebay_oauth_flow()
+
+    # Process messages and extract images
+    message_data = process_twilio_messages(client, TWILIO_NUMBER)
+    process_images()
     
