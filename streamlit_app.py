@@ -628,6 +628,8 @@ def main():
 
 # Main
 if __name__ == "__main__":
+    client = init_twilio_client()
+
     other_data = process_twilio_messages(client, TWILIO_NUMBER)
     message_data = list(other_data.values())[0]
     last_message = ""
