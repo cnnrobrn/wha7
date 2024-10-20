@@ -614,15 +614,14 @@ def main():
             send_results_via_twilio(client, user_phone, tagged_concepts)
         else:
             st.write("No concepts extracted from the image.")
+        delete_photos(FOLDER_PATH)
         return list(message_data.values())[0]
-
     # In the main section, after processing the concepts and eBay links:
 
 
 
 
     # Delete photos at the end of the program
-    delete_photos(FOLDER_PATH)
 
 
 
