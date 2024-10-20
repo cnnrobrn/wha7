@@ -13,10 +13,7 @@ import re
 import shutil
 import json
 import time
-from flask import Flask, request, jsonify
 
-# Initialize Flask app
-app = Flask(__name__)
 
 # Fetch secrets from st.secrets
 EBAY_AFFILIATE_ID = st.secrets["EBAY_AFFILIATE_ID"]
@@ -238,14 +235,6 @@ STYLISTIC_ITEMS = [
     "zebra"
 ]
 
-# Define your default category
-DEFAULT_CATEGORY = "11450"
-
-# Function to get category with a default fallback
-def get_category(concept):
-    return CONCEPT_TO_CATEGORY.get(concept, DEFAULT_CATEGORY)
-
-
 # Initialize clients
 def init_twilio_client():
     st.success('Twilio initialized!', icon="✅")
@@ -361,6 +350,13 @@ def analyze_images(image_data, model):
             st.write(f"Error occurred: {str(e)}")
     return image_data
 
+
+
+# Image analysis and prediction
+from io import BytesIO
+
+# Image analysis and prediction
+# Image analysis and prediction
 def add_tags(concepts, model):
     for data in concepts:
         image_source = data['concept_image']  # This could be a file path or URL
@@ -437,6 +433,7 @@ def extract_concepts(text):
     if matches:
         return matches[0]
     return None
+
 
 def crop_image(image_path, top_row, left_col, bottom_row, right_col):
     concept_image = Image.open(image_path)
@@ -555,51 +552,9 @@ def send_results_via_twilio(client, to_number, concepts):
     except Exception as e:
         st.error(f"Failed to send SMS: {str(e)}")
 
-# Webhook endpoint to receive Twilio messages
-@app.route("/twilio-webhook", methods=["POST"])
-def twilio_webhook():
-    from_number = request.form.get("From")
-    msg_sid = request.form.get("MessageSid")
-    num_media = int(request.form.get("NumMedia", 0))
 
-    if num_media > 0:
-        client = init_twilio_client()
-        detector_model = init_clarifai_model(CLARIFAI_PAT)
-        label_model = init_clarifai_labels(CLARIFAI_PAT)
-        EBAY_ACCESS_TOKEN = ebay_oauth_flow()
 
-        directory_path = Path(f"{FOLDER_PATH}/{from_number}")
-        create_directory_for_number(directory_path)
-        media_urls, file_paths, file_names = [], [], []
-        media_urls, file_paths, file_names = download_media(client.messages(msg_sid).media.list(), from_number, msg_sid)
-        message_data = {
-            from_number: [{
-                "media_urls": media_urls,
-                "media_path": file_paths,
-                "file_names": file_names
-            }]
-        }
 
-        # List image paths for the user
-        image_data = list_image_paths(FOLDER_PATH, from_number)
-        url_image_data = s3_write_urls(image_data)
-
-        # Analyze images using Clarifai model
-        prediction_responses = analyze_images(url_image_data, detector_model)
-
-        # User interaction
-        user_concepts = extract_user_concepts(prediction_responses, from_number)
-        tagged_concepts = add_tags(user_concepts, label_model)
-
-        # Send user concepts to eBay Vision Search API and get top 3 links
-        if tagged_concepts:
-            tagged_concepts = search_ebay_with_concepts(tagged_concepts, EBAY_ACCESS_TOKEN, EBAY_AFFILIATE_ID)
-            send_results_via_twilio(client, from_number, tagged_concepts)
-
-        # Delete photos at the end of the process
-        delete_photos(FOLDER_PATH)
-
-    return jsonify({"status": "success"}), 200
 
 # Main
 if __name__ == "__main__":
@@ -611,5 +566,62 @@ if __name__ == "__main__":
     # Obtain eBay OAuth token
     EBAY_ACCESS_TOKEN = ebay_oauth_flow()
 
-    # Start the Flask app
-    app.run(port=5000)
+    # Process messages and extract images
+    message_data = process_twilio_messages(client, TWILIO_NUMBER)
+
+    if not message_data:
+        st.error("No messages with media to process.")
+    else:
+        # Get the phone number from the message_data
+        user_phone = list(message_data.keys())[0]
+
+        # List image paths for the user
+        image_data = list_image_paths(FOLDER_PATH, user_phone)
+        url_image_data = s3_write_urls(image_data)
+        st.success("Written to S3", icon="✅")
+
+        # Analyze images using Clarifai model
+        prediction_responses = analyze_images(url_image_data, detector_model)
+        st.success("Predictions generated", icon="✅")
+
+
+        # User interaction
+        st.write(f"Processing images from phone number: {user_phone}")
+        user_concepts = extract_user_concepts(prediction_responses, user_phone)
+        st.success("Concepts analyzed", icon="✅")
+
+        tagged_concepts=add_tags(user_concepts,label_model)
+        st.success("Concepts tagged", icon="✅")
+
+        # Send user concepts to eBay Vision Search API and get top 3 links
+        if tagged_concepts:
+            tagged_concepts = search_ebay_with_concepts(tagged_concepts, EBAY_ACCESS_TOKEN,EBAY_AFFILIATE_ID)
+            st.write("eBay Search Results:")
+            for concept in tagged_concepts:
+                concept_name = concept['concept_name']
+                st.write(f"Top 3 eBay links for concept '{concept_name}':")
+                st.write(concept)
+                # Display concept image and links in columns
+                col1, col2 = st.columns([1, 3])
+                with col1:
+                    # Display concept image
+                    st.image(concept['concept_image'], caption=concept_name, use_column_width=True)
+                with col2:
+                    # Display top 3 links
+                    top_links = concept.get('top_links', [])
+                    if top_links:
+                        for link in top_links:
+                            st.markdown(f"- [eBay Item Link]({link})")
+                    else:
+                        st.write("No links found.")
+            send_results_via_twilio(client, user_phone, tagged_concepts)
+        else:
+            st.write("No concepts extracted from the image.")
+
+    # In the main section, after processing the concepts and eBay links:
+
+
+
+
+    # Delete photos at the end of the program
+    delete_photos(FOLDER_PATH)
