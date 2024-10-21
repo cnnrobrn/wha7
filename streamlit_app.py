@@ -249,16 +249,7 @@ def init_clarifai_labels(key):
     st.success('Clarifai labeling initialized!', icon="✅")
     model_url = "https://clarifai.com/clarifai/main/models/apparel-classification-v2"
     return Model(url=model_url, pat=key)
-
-def init_clarifai_face(key):
-    st.success('Clarifai face initialized!', icon="✅")
-    model_url = "https://clarifai.com/clarifai/main/models/face-detection"
-    return Model(url=model_url, pat=key)
-
-def init_clarfai_gender(key):
-    st.success('Clarifai gender initialized!', icon="✅")
-    model_url = "https://clarifai.com/clarifai/main/models/gender-demographics-recognition"
-    return Model(url=model_url, pat=key)
+    
 
 # Twilio message processing
 def create_directory_for_number(directory_path):
@@ -290,28 +281,6 @@ def save_media(response, from_number, msg_sid, media_index):
         with open(file_path, "wb") as file:
             file.write(response.content)
     return file_path, file_name
-
-
-def face_crops(prediction_responses):
-    concepts = []
-    for data in prediction_responses:
-        if data['prediction'].outputs:
-            regions = data['prediction'].outputs[0].data.regions[0]
-            top_row = regions.region_info.bounding_box.top_row
-            left_col = regions.region_info.bounding_box.left_col
-            bottom_row = regions.region_info.bounding_box.bottom_row
-            right_col = regions.region_info.bounding_box.right_col
-            image_path = data['image_path']
-            if os.path.exists(image_path):
-                buffer_up = 1.00
-                buffer_under = 2 - buffer_up
-                concept_image = crop_image(image_path, top_row * buffer_under, left_col * buffer_under, bottom_row * buffer_up, right_col * buffer_up)
-                concepts.append({
-                    "concept_image": concept_image,
-                })
-            else:
-                st.error(f"Image file not found: {image_path}")
-    return concepts
 
 def process_twilio_messages(client, twilio_number):
     messages = client.messages.list(to=twilio_number)
@@ -459,7 +428,6 @@ def extract_user_concepts(prediction_responses, user_phone):
                             })
     return concepts
 
-
 def extract_concepts(text):
     # Using regex to find all occurrences of 'name: "<value>"'
     matches = re.findall(r'name: \"(.*?)\"', text)
@@ -591,8 +559,6 @@ def main():
     client = init_twilio_client()
     detector_model = init_clarifai_model(CLARIFAI_PAT)
     label_model = init_clarifai_labels(CLARIFAI_PAT)
-    face_model = init_clarifai_face(CLARIFAI_PAT)
-    gender_model = init_clarfai_gender(CLARIFAI_PAT)
 
     # Obtain eBay OAuth token
     EBAY_ACCESS_TOKEN = ebay_oauth_flow()
@@ -624,10 +590,6 @@ def main():
 
         tagged_concepts=add_tags(user_concepts,label_model)
         st.success("Concepts tagged", icon="✅")
-
-        faces = analyze_images(url_image_data, face_model)
-        face_image = face_crops(faces)
-        st.write(add_tags(face_image,gender_model))
 
         # Send user concepts to eBay Vision Search API and get top 3 links
         if tagged_concepts:
