@@ -293,7 +293,7 @@ def save_media(response, from_number, msg_sid, media_index):
 
 
 def face_crops(prediction_responses):
-    concepts=[]
+    concepts = []
     for data in prediction_responses:
         if data['prediction'].outputs:
             regions = data['prediction'].outputs[0].data.regions[0]
@@ -302,12 +302,15 @@ def face_crops(prediction_responses):
             bottom_row = regions.region_info.bounding_box.bottom_row
             right_col = regions.region_info.bounding_box.right_col
             image_path = data['image_path']
-            buffer_up=1.00
-            buffer_under=2-buffer_up
-            concept_image = crop_image(image_path, top_row*buffer_under, left_col*buffer_under, bottom_row*buffer_up, right_col*buffer_up)
-            concepts.append({
-                "concept_image": concept_image,
+            if os.path.exists(image_path):
+                buffer_up = 1.00
+                buffer_under = 2 - buffer_up
+                concept_image = crop_image(image_path, top_row * buffer_under, left_col * buffer_under, bottom_row * buffer_up, right_col * buffer_up)
+                concepts.append({
+                    "concept_image": concept_image,
                 })
+            else:
+                st.error(f"Image file not found: {image_path}")
     return concepts
 
 def process_twilio_messages(client, twilio_number):
