@@ -616,6 +616,7 @@ def main():
         else:
             st.write("No concepts extracted from the image.")
         delete_photos(FOLDER_PATH)
+        st.write(message_data)
         return list(message_data.values())[0]
     # In the main section, after processing the concepts and eBay links:
 
@@ -633,6 +634,7 @@ if __name__ == "__main__":
     while True:
         other_data = process_twilio_messages(client, TWILIO_NUMBER)
         message_data = list(other_data.values())[0]
+        st.write (other_data)
         if message_data != last_message:
             last_message = main()
             message_data = last_message
