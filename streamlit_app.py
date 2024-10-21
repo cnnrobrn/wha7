@@ -614,10 +614,6 @@ def main():
 
         # Analyze images using Clarifai model
         prediction_responses = analyze_images(url_image_data, detector_model)
-        faces = analyze_images(url_image_data, face_model)
-        face_image = face_crops(faces)
-        st.write(add_tags(face_image,gender_model))
-
         st.success("Predictions generated", icon="✅")
 
 
@@ -628,6 +624,10 @@ def main():
 
         tagged_concepts=add_tags(user_concepts,label_model)
         st.success("Concepts tagged", icon="✅")
+
+        faces = analyze_images(url_image_data, face_model)
+        face_image = face_crops(faces)
+        st.write(add_tags(face_image,gender_model))
 
         # Send user concepts to eBay Vision Search API and get top 3 links
         if tagged_concepts:
