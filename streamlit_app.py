@@ -603,7 +603,7 @@ def main():
             for concept in tagged_concepts:
                 concept_name = concept['concept_name']
                 st.write(f"Top 3 eBay links for concept '{concept_name}':")
-                st.write(concept)
+                #st.write(concept)
                 # Display concept image and links in columns
                 col1, col2 = st.columns([1, 3])
                 with col1:
@@ -621,7 +621,7 @@ def main():
         else:
             st.write("No concepts extracted from the image.")
         delete_photos(FOLDER_PATH)
-        st.write(message_data)
+        #st.write(message_data)
         return list(message_data.values())[0]
     # In the main section, after processing the concepts and eBay links:
 
@@ -639,7 +639,7 @@ if __name__ == "__main__":
     while True:
         other_data = process_twilio_messages(client, TWILIO_NUMBER)
         message_data = list(other_data.values())[0]
-        st.write (other_data)
+        #st.write (other_data)
         if message_data != last_message:
             last_message = main()
             message_data = last_message
