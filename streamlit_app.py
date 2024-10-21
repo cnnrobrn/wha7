@@ -315,6 +315,7 @@ def list_image_paths(folder_path, phone_number):
             image_path = os.path.join(subfolder_path, image_file)
             if image_path.endswith(('.png', '.jpg', '.jpeg')):
                 image_data.append({"phone_number": phone_number, "image_path": image_path, "url": ""})
+            break
     st.write(image_data)
     return image_data
 
