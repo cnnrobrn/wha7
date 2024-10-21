@@ -533,27 +533,30 @@ def delete_photos(folder_path):
 
 #sends the outputs back
 def send_results_via_twilio(client, to_number, concepts):
-    message_body = "Here are the items we found in your photo:\n\n"
     for concept in concepts:
+        # Create message body for each concept
         concept_name = concept['concept_name']
-        message_body += f"{concept_name.capitalize()}:\n"
+        message_body = f"{concept_name.capitalize()}:\n"
+        
         top_links = concept.get('top_links', [])
         if top_links:
             for i, link in enumerate(top_links, 1):
                 message_body += f"{i}. {link}\n"
         else:
             message_body += "No links found.\n"
-        message_body += "\n"
+        
+        # Try sending each message
+        try:
+            message = client.messages.create(
+                body=message_body,
+                from_=TWILIO_NUMBER,
+                to=to_number
+            )
+            st.success(f"Results for {concept_name} sent via SMS to {to_number}", icon="✅")
+        except Exception as e:
+            st.error(f"Failed to send SMS for {concept_name}: {str(e)}")
 
-    try:
-        message = client.messages.create(
-            body=message_body,
-            from_=TWILIO_NUMBER,
-            to=to_number
-        )
-        st.success(f"Results sent via SMS to {to_number}", icon="✅")
-    except Exception as e:
-        st.error(f"Failed to send SMS: {str(e)}")
+
 
 
 def main():
