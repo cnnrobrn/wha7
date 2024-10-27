@@ -281,7 +281,7 @@ def save_media(response, from_number, msg_sid, media_index):
     content_type = response.headers['Content-Type']
     extension = "png" if "image" in content_type else content_type.split('/')[1]
     file_path = os.path.join(FOLDER_PATH, from_number, f"{msg_sid}_{media_index}.{extension}")
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    #os.makedirs(os.path.dirname(file_path), exist_ok=True)
     file_name = file_path.split('/')[-1]
     if "image" in content_type:
         image = Image.open(BytesIO(response.content)).convert("RGBA")
