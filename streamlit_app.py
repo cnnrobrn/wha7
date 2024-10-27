@@ -249,7 +249,16 @@ def init_clarifai_labels(key):
     st.success('Clarifai labeling initialized!', icon="✅")
     model_url = "https://clarifai.com/clarifai/main/models/apparel-classification-v2"
     return Model(url=model_url, pat=key)
-    
+ 
+def init_clarifai_face(key):
+    st.success('Clarifai labeling initialized!', icon="✅")
+    model_url = "https://clarifai.com/clarifai/main/models/face-detection"
+    return Model(url=model_url, pat=key)
+
+def init_clarifai_gender(key):
+    st.success('Clarifai labeling initialized!', icon="✅")
+    model_url = "https://clarifai.com/clarifai/main/models/gender-demographics-recognition"
+    return Model(url=model_url, pat=key)   
 
 # Twilio message processing
 def create_directory_for_number(directory_path):
@@ -437,6 +446,18 @@ def extract_concepts(text):
         return matches[0]
     return None
 
+def get_gender(url_image_data,face_model,gender_model):
+    for data in url_image_data:
+        url = data['url']
+        try:
+            prediction_response = face_model.predict_by_url(url, input_type="image")
+            if prediction_response.outputs:
+                data["prediction"] = prediction_response
+                st.write(data['prediction'])
+        except Exception as e:
+            st.write(f'Error occurred{e}')
+    return 'null'
+
 
 def crop_image(image_path, top_row, left_col, bottom_row, right_col):
     concept_image = Image.open(image_path)
@@ -564,7 +585,8 @@ def main():
     client = init_twilio_client()
     detector_model = init_clarifai_model(CLARIFAI_PAT)
     label_model = init_clarifai_labels(CLARIFAI_PAT)
-
+    face_model = init_clarifai_face(CLARIFAI_PAT)
+    gender_model = init_clarifai_gender(CLARIFAI_PAT)
     # Obtain eBay OAuth token
     EBAY_ACCESS_TOKEN = ebay_oauth_flow()
 
@@ -585,6 +607,7 @@ def main():
 
         # Analyze images using Clarifai model
         prediction_responses = analyze_images(url_image_data, detector_model)
+        gender = get_gender(url_image_data,face_model,gender_model)
         st.success("Predictions generated", icon="✅")
 
 
