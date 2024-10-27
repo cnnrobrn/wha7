@@ -430,9 +430,8 @@ def extract_user_concepts(prediction_responses, user_phone):
                     for concept in region.data.concepts:
                         if concept.value > THRESHOLD:
                             image_path = data['image_path']
-                            buffer_up=1.00
-                            buffer_under=2-buffer_up
-                            concept_image = crop_image(image_path, top_row*buffer_under, left_col*buffer_under, bottom_row*buffer_up, right_col*buffer_up)
+                            st.write(f'image path:{image_path}')
+                            concept_image = crop_image(image_path, top_row, left_col, bottom_row, right_col)
                             concepts.append({
                                 "concept_image": concept_image,
                                 "concept_name": concept.name.lower()
