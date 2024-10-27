@@ -251,12 +251,12 @@ def init_clarifai_labels(key):
     return Model(url=model_url, pat=key)
  
 def init_clarifai_face(key):
-    st.success('Clarifai labeling initialized!', icon="✅")
+    st.success('Clarifai face initialized!', icon="✅")
     model_url = "https://clarifai.com/clarifai/main/models/face-detection"
     return Model(url=model_url, pat=key)
 
 def init_clarifai_gender(key):
-    st.success('Clarifai labeling initialized!', icon="✅")
+    st.success('Clarifai gender initialized!', icon="✅")
     model_url = "https://clarifai.com/clarifai/main/models/gender-demographics-recognition"
     return Model(url=model_url, pat=key)   
 
