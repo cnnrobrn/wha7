@@ -567,7 +567,7 @@ def get_gender(url_image_data,face_model,gender_model):
                                     st.write(f"Error occurred: {str(e)}")
         except Exception as e:
             st.write(f'Error occurred: {e}')
-    return 'women'
+            return 'women'
 
 
 def crop_image(image_path, top_row, left_col, bottom_row, right_col):
