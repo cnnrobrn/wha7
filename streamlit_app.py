@@ -730,6 +730,7 @@ def main():
         st.success("Concepts analyzed", icon="✅")
 
         tagged_concepts=add_tags(user_concepts,label_model)
+        print(tagged_concepts)
         st.success("Concepts tagged", icon="✅")
 
         # Send user concepts to eBay Vision Search API and get top 3 links
@@ -757,7 +758,7 @@ def main():
         else:
             st.write("No concepts extracted from the image.")
         delete_photos(FOLDER_PATH)
-        st.write(message_data)
+        #st.write(message_data)
         return list(message_data.values())[0]
     # In the main section, after processing the concepts and eBay links:
 
