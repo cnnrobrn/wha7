@@ -449,6 +449,7 @@ def get_gender(url_image_data,face_model,gender_model):
     for data in url_image_data:
         url = data['url']
         face_data = []
+        gender=[]
         try:
             prediction_response = face_model.predict_by_url(url, input_type="image")
             if prediction_response.outputs:
@@ -485,8 +486,8 @@ def get_gender(url_image_data,face_model,gender_model):
 
                                         concepts_list = prediction_response.outputs[0].data.concepts
                                         # Save the concepts to data["tags"]
-                                        data["tags"]=concepts_list
-                                        st.write (concepts_list)
+                                        gender["tags"]=concepts_list
+                                        st.write (gender)
                                 except Exception as e:
                                     st.write(f"Error occurred: {str(e)}")
         except Exception as e:
