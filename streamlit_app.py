@@ -478,9 +478,9 @@ def get_gender(url_image_data,face_model,gender_model):
                                 try:
                                     prediction_response = gender_model.predict_by_bytes(image_bytes, input_type='image')
                                     if prediction_response.outputs:
-                                    concepts_list = prediction_response.outputs[0].data.concepts
-                                    gender.append(concepts_list)
-                                    st.write(gender)
+                                        concepts_list = prediction_response.outputs[0].data.concepts
+                                        gender.append(concepts_list)
+                                        st.write(gender)
                                 except Exception as e:
                                     st.write(f"Error occurred: {str(e)}")
         except Exception as e:
