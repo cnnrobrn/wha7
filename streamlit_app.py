@@ -449,50 +449,43 @@ def get_gender(url_image_data,face_model,gender_model):
     for data in url_image_data:
         url = data['url']
         face_data = []
-        gender=[]
+        gender = []
         try:
             prediction_response = face_model.predict_by_url(url, input_type="image")
             if prediction_response.outputs:
-                face_data["prediction"] = prediction_response
-                st.write(face_data['prediction'])
-                if face_data['prediction'].outputs:
-                    regions = data['prediction'].outputs[0].data.regions
-                    for region in regions:
-                        top_row = region.region_info.bounding_box.top_row
-                        left_col = region.region_info.bounding_box.left_col
-                        bottom_row = region.region_info.bounding_box.bottom_row
-                        right_col = region.region_info.bounding_box.right_col
-                        for concept in region.data.concepts:
-                            if concept.value > THRESHOLD:
-                                image_path = data['image_path']
-                                concept_image = crop_image(image_path, top_row, left_col, bottom_row, right_col)
-                                image_bytes_io = BytesIO()
-                                concept_image.save(image_bytes_io, format="PNG")  # Adjust the format if necessary
-                                image_bytes = image_bytes_io.getvalue()
+            face_data.append({"prediction": prediction_response})
+            st.write(face_data[0]['prediction'])
+            if face_data[0]['prediction'].outputs:
+                regions = face_data[0]['prediction'].outputs[0].data.regions
+                for region in regions:
+                top_row = region.region_info.bounding_box.top_row
+                left_col = region.region_info.bounding_box.left_col
+                bottom_row = region.region_info.bounding_box.bottom_row
+                right_col = region.region_info.bounding_box.right_col
+                for concept in region.data.concepts:
+                    if concept.value > THRESHOLD:
+                    image_path = data['image_path']
+                    concept_image = crop_image(image_path, top_row, left_col, bottom_row, right_col)
+                    image_bytes_io = BytesIO()
+                    concept_image.save(image_bytes_io, format="PNG")  # Adjust the format if necessary
+                    image_bytes = image_bytes_io.getvalue()
 
-                                # Base64-encode the image bytes
-                                image_base64_bytes = base64.b64encode(image_bytes)
-                                # Decode to UTF-8 string
-                                image_base64_string = image_base64_bytes.decode('utf-8')
+                    # Base64-encode the image bytes
+                    image_base64_bytes = base64.b64encode(image_bytes)
+                    # Decode to UTF-8 string
+                    image_base64_string = image_base64_bytes.decode('utf-8')
 
-                                # Optionally, display the Base64 string (careful, it's long)
-                                # st.write(image_base64_string)
-
-                                try:
-                                    # Remove the incorrect input_type="text" argument
-                                    # Pass the correct bytes data to predict_by_bytes
-                                    prediction_response = gender_model.predict_by_bytes(image_bytes, input_type='image')
-                                    if prediction_response.outputs:
-
-                                        concepts_list = prediction_response.outputs[0].data.concepts
-                                        # Save the concepts to data["tags"]
-                                        gender[0]=concepts_list
-                                        st.write (gender)
-                                except Exception as e:
-                                    st.write(f"Error occurred: {str(e)}")
+                    try:
+                        prediction_response = gender_model.predict_by_bytes(image_bytes, input_type='image')
+                        if prediction_response.outputs:
+                        concepts_list = prediction_response.outputs[0].data.concepts
+                        gender.append(concepts_list)
+                        st.write(gender)
+                    except Exception as e:
+                        st.write(f"Error occurred: {str(e)}")
         except Exception as e:
-            st.write(f'Error occurred{e}')
-    return gender[0]
+            st.write(f'Error occurred: {e}')
+    return 'null'
 
 
 def crop_image(image_path, top_row, left_col, bottom_row, right_col):
