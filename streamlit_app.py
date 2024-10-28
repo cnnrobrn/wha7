@@ -458,31 +458,31 @@ def get_gender(url_image_data,face_model,gender_model):
                 if face_data[0]['prediction'].outputs:
                     regions = face_data[0]['prediction'].outputs[0].data.regions
                     for region in regions:
-                    top_row = region.region_info.bounding_box.top_row
-                    left_col = region.region_info.bounding_box.left_col
-                    bottom_row = region.region_info.bounding_box.bottom_row
-                    right_col = region.region_info.bounding_box.right_col
-                    for concept in region.data.concepts:
-                        if concept.value > THRESHOLD:
-                        image_path = data['image_path']
-                        concept_image = crop_image(image_path, top_row, left_col, bottom_row, right_col)
-                        image_bytes_io = BytesIO()
-                        concept_image.save(image_bytes_io, format="PNG")  # Adjust the format if necessary
-                        image_bytes = image_bytes_io.getvalue()
+                        top_row = region.region_info.bounding_box.top_row
+                        left_col = region.region_info.bounding_box.left_col
+                        bottom_row = region.region_info.bounding_box.bottom_row
+                        right_col = region.region_info.bounding_box.right_col
+                        for concept in region.data.concepts:
+                            if concept.value > THRESHOLD:
+                                image_path = data['image_path']
+                                concept_image = crop_image(image_path, top_row, left_col, bottom_row, right_col)
+                                image_bytes_io = BytesIO()
+                                concept_image.save(image_bytes_io, format="PNG")  # Adjust the format if necessary
+                                image_bytes = image_bytes_io.getvalue()
 
-                        # Base64-encode the image bytes
-                        image_base64_bytes = base64.b64encode(image_bytes)
-                        # Decode to UTF-8 string
-                        image_base64_string = image_base64_bytes.decode('utf-8')
+                                # Base64-encode the image bytes
+                                image_base64_bytes = base64.b64encode(image_bytes)
+                                # Decode to UTF-8 string
+                                image_base64_string = image_base64_bytes.decode('utf-8')
 
-                        try:
-                            prediction_response = gender_model.predict_by_bytes(image_bytes, input_type='image')
-                            if prediction_response.outputs:
-                            concepts_list = prediction_response.outputs[0].data.concepts
-                            gender.append(concepts_list)
-                            st.write(gender)
-                        except Exception as e:
-                            st.write(f"Error occurred: {str(e)}")
+                                try:
+                                    prediction_response = gender_model.predict_by_bytes(image_bytes, input_type='image')
+                                    if prediction_response.outputs:
+                                    concepts_list = prediction_response.outputs[0].data.concepts
+                                    gender.append(concepts_list)
+                                    st.write(gender)
+                                except Exception as e:
+                                    st.write(f"Error occurred: {str(e)}")
         except Exception as e:
             st.write(f'Error occurred: {e}')
     return 'null'
