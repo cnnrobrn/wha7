@@ -33,136 +33,211 @@ AWS_ACCESS_KEY_ID = st.secrets["AWS_ACCESS_KEY_ID"]
 AWS_SECRET_ACCESS_KEY = st.secrets["AWS_SECRET_ACCESS_KEY"]
 
 # Mapping of concepts to eBay category IDs
+# Updated mapping of (gender, concept) to eBay category IDs
 CONCEPT_TO_CATEGORY = {
-    "bag": "169291",  # Bags, purses, and backpacks - unisex
-    "belt": "2993",  # Belts - men's and women's accessories
-    "bowtie": "15662",  # Ties and bowties - men's formalwear
-    "bracelet": "10370",  # Bracelets - men's and women's jewelry
-    "dress": "63861",  # Dresses - women's clothing
-    "earrings": "10985",  # Earrings - women's and men's jewelry
-    "glasses": "180957",  # Eyeglasses - unisex
-    "gloves": "182108",  # Gloves - men's and women's accessories
-    "hair clip": "110626",  # Hair accessories - women's accessories
-    "hat": "52382",  # Hats - men's and women's hats
-    "headband": "45220",  # Headbands - women's accessories
-    "hosiery": "11511",  # Hosiery and socks - women's clothing
-    "jumpsuit": "3009",  # Jumpsuits - women's clothing
-    "mittens": "1069",  # Mittens - men's and women's accessories
-    "necklace": "164329",  # Necklaces - men's and women's jewelry
-    "necktie": "15662",  # Ties and neckties - men's formalwear
-    "outerwear": "57988",  # Outerwear, including coats and jackets - men's and women's clothing
-    "pants": "63863",  # Pants - men's and women's clothing
-    "pin/brooch": "110626",  # Pins and brooches - women's accessories
-    "pocket square": "15662",  # Ties and pocket squares - men's formalwear
-    "ring": "67726",  # Rings - men's and women's jewelry
-    "romper": "63861",  # Rompers - women's clothing
-    "scarf": "45238",  # Scarves - men's and women's accessories
-    "shoes": "63889",  # Shoes - men's and women's shoes
-    "shorts": "11555",  # Shorts - men's and women's clothing
-    "skirt": "63864",  # Skirts - women's clothing
-    "socks": "11511",  # Socks - men's and women's clothing
-    "sunglasses": "179247",  # Sunglasses - unisex
-    "suspenders": "15662",  # Suspenders - men's accessories
-    "swimwear": "63867",  # Swimwear - men's and women's swimwear
-    "tie clip": "15662",  # Tie clips and accessories - men's formalwear
-    "top": "53159",  # Tops - women's clothing
-    "vest": "11510",  # Vests - men's and women's clothing
-    "watch": "31387",  # Watches - men's and women's accessories
-    "t-shirt": "15687",  # T-shirts - men's and women's clothing
-    "jeans": "11483",  # Jeans - men's and women's clothing
-    "jacket": "57988",  # Jackets - men's and women's clothing
-    "coat": "57988",  # Coats - men's and women's clothing
-    "suit": "3001",  # Suits - men's formalwear
-    "sweater": "11484",  # Sweaters - men's and women's clothing
-    "blouse": "53159",  # Blouses - women's clothing
-    "hoodie": "11484",  # Hoodies - men's and women's clothing
-    "cardigan": "11484",  # Cardigans - women's clothing
-    "leggings": "169001",  # Leggings - women's clothing
-    "bikini": "63867",  # Bikinis - women's swimwear
-    "gown": "11554",  # Gowns - women's formalwear
-    "cape": "11510",  # Capes - men's and women's clothing
-    "mask": "183477",  # Masks - unisex accessories
-    "overalls": "11554",  # Overalls - men's and women's clothing
-    "poncho": "11510",  # Ponchos - men's and women's clothing
-    "sarong": "63867",  # Sarongs - women's swimwear
-    "shawl": "45238",  # Shawls - women's accessories
-    "sleepwear": "63862",  # Sleepwear - men's and women's clothing
-    "tracksuit": "11554",  # Tracksuits - men's and women's clothing
-    "trousers": "63863",  # Trousers - men's and women's clothing
-    "backpack": "169291",  # Backpacks - unisex accessories
-    "bandeau": "63867",  # Bandeaus - women's clothing
-    "beanie": "52382",  # Beanies - men's and women's hats
-    "beret": "52382",  # Berets - men's and women's hats
-    "bermuda shorts": "11555",  # Bermuda shorts - men's and women's clothing
-    "biker jacket": "57988",  # Biker jackets - men's and women's clothing
-    "bikini bottom": "63867",  # Bikini bottoms - women's swimwear
-    "bikini set": "63867",  # Bikini sets - women's swimwear
-    "bikini top": "63867",  # Bikini tops - women's swimwear
-    "blazer": "3002",  # Blazers - men's and women's formalwear
-    "boatneck/bateau": "53159",  # Boatneck or bateau tops - women's clothing
-    "bomber": "57988",  # Bomber jackets - men's and women's clothing
-    "booties": "63889",  # Booties - women's shoes
-    "bra": "63853",  # Bras - women's undergarments
-    "bucket hat": "52382",  # Bucket hats - men's and women's hats
-    "camisole": "11514",  # Camisoles - women's clothing
-    "cape/poncho": "11510",  # Capes and ponchos - men's and women's clothing
-    "capris": "63863",  # Capris - women's clothing
-    "capsleeve": "53159",  # Capsleeve tops - women's clothing
-    "cargo pants": "11554",  # Cargo pants - men's and women's clothing
-    "cargo shorts": "11555",  # Cargo shorts - men's and women's clothing
-    "denim jacket": "57988",  # Denim jackets - men's and women's clothing
-    "duffle coat": "57988",  # Duffle coats - men's and women's clothing
-    "fedora": "52382",  # Fedoras - men's and women's hats
-    "field jacket": "57988",  # Field jackets - men's and women's clothing
-    "flats": "63889",  # Flats - women's shoes
-    "fleece": "11484",  # Fleece clothing - men's and women's clothing
-    "flip-flops": "11504",  # Flip-flops - men's and women's shoes
-    "floppy hat": "52382",  # Floppy hats - women's hats
-    "halter": "11514",  # Halter tops - women's clothing
-    "loafers": "11504",  # Loafers - men's and women's shoes
-    "maxi dress": "63861",  # Maxi dresses - women's clothing
-    "maxi skirt": "63864",  # Maxi skirts - women's clothing
-    "midi dress": "63861",  # Midi dresses - women's clothing
-    "midi skirt": "63864",  # Midi skirts - women's clothing
-    "mini dress": "63861",  # Mini dresses - women's clothing
-    "mini skirt": "63864",  # Mini skirts - women's clothing
-    "mockneck": "53159",  # Mockneck tops - women's clothing
-    "mules": "11504",  # Mules - women's shoes
-    "newsboy/flat cap": "52382",  # Newsboy or flat caps - men's and women's hats
-    "one piece swimsuit": "63867",  # One-piece swimsuits - women's swimwear
-    "oxfords": "11504",  # Oxford shoes - men's and women's shoes
-    "pajamas": "63862",  # Pajamas - men's and women's sleepwear
-    "parka": "57988",  # Parkas - men's and women's clothing
-    "peacoat": "57988",  # Peacoats - men's and women's clothing
-    "polo": "1059",  # Polo shirts - men's and women's clothing
-    "puffer coat": "57988",  # Puffer coats - men's and women's clothing
-    "puffer vest": "57988",  # Puffer vests - men's and women's clothing
-    "pumps": "11504",  # Pumps - women's shoes
-    "rain boots": "63889",  # Rain boots - men's and women's shoes
-    "sandals": "11504",  # Sandals - men's and women's shoes
-    "satchel": "169291",  # Satchels - men's and women's bags
-    "shirt": "53159",  # Shirts - men's and women's clothing
-    "short-sleeve": "53159",  # Short-sleeve tops - men's and women's clothing
-    "shortalls": "11554",  # Shortalls - women's clothing
-    "sleeveless":"53159", #tops - womens
-    "shoulder bag": "169291",  # Shoulder bags - women's bags
-    "sneakers": "11504",  # Sneakers - men's and women's shoes
-    "spaghetti strap": "53159",  # Spaghetti strap tops - women's clothing
-    "strapless": "53159",  # Strapless tops - women's clothing
-    "suit jacketsuit pants": "3001",  # Suit jackets and pants - men's formalwear
-    "sweater vest": "11484",  # Sweater vests - men's and women's clothing
-    "sweatpants": "11554",  # Sweatpants - men's and women's clothing
-    "sweatshirt": "11484",  # Sweatshirts - men's and women's clothing
-    "swim trunks": "63867",  # Swim trunks - men's swimwear
-    "tank": "11514",  # Tank tops - men's and women's clothing
-    "tote bag": "169291",  # Tote bags - women's bags
-    "trapper hat": "52382",  # Trapper hats - men's and women's hats
-    "trenchcoat": "57988",  # Trenchcoats - men's and women's clothing
-    "waistcoat": "11510",  # Waistcoats - men's and women's formalwear
-    "wedges": "11504",  # Wedge shoes - women's shoes
-    "wide leg pants": "63863",  # Wide leg pants - women's clothing
-    "wristlet and clutch": "169291"  # Wristlets and clutches - women's accessories
+    ("women", "bag"): "169291",  # Bags, purses, and backpacks - unisex
+    ("men", "bag"): "169291",  # Bags, purses, and backpacks - unisex
+    ("men", "belt"): "2993",  # Belts - men's accessories
+    ("women", "belt"): "3003",  # Belts - women's accessories
+    ("men", "bowtie"): "15662",  # Bowties - men's formalwear
+    ("men", "bracelet"): "137835",  # Bracelets - men's jewelry
+    ("women", "bracelet"): "164315",  # Bracelets - women's jewelry
+    ("women", "dress"): "63861",  # Dresses - women's clothing
+    ("men", "earrings"): "137856",  # Earrings - men's jewelry
+    ("women", "earrings"): "164321",  # Earrings - women's jewelry
+    ("women", "glasses"): "180957",  # Eyeglasses - unisex
+    ("men", "glasses"): "180957",  # Eyeglasses - unisex
+    ("men", "gloves"): "52347",  # Gloves - men's accessories
+    ("women", "gloves"): "105559",  # Gloves - women's accessories
+    ("women", "hair clip"): "110627",  # Hair accessories - women's accessories
+    ("men", "hat"): "52365",  # Hats - men's hats
+    ("women", "hat"): "3004",  # Hats - women's hats
+    ("women", "headband"): "163628",  # Headbands - women's accessories
+    ("women", "hosiery"): "11511",  # Hosiery and socks - women's clothing
+    ("men", "hosiery"): "4250",  # Socks - men's clothing
+    ("women", "jumpsuit"): "3009",  # Jumpsuits - women's clothing
+    ("men", "jumpsuit"): "57988",  # Jumpsuits - men's clothing
+    ("men", "mittens"): "52347",  # Mittens - men's accessories
+    ("women", "mittens"): "105559",  # Mittens - women's accessories
+    ("men", "necklace"): "137860",  # Necklaces - men's jewelry
+    ("women", "necklace"): "164329",  # Necklaces - women's jewelry
+    ("men", "necktie"): "15662",  # Ties and neckties - men's formalwear
+    ("men", "outerwear"): "57988",  # Outerwear - men's clothing
+    ("women", "outerwear"): "63862",  # Outerwear - women's clothing
+    ("men", "pants"): "57989",  # Pants - men's clothing
+    ("women", "pants"): "63863",  # Pants - women's clothing
+    ("women", "pin/brooch"): "110626",  # Pins and brooches - women's accessories
+    ("men", "pocket square"): "15662",  # Pocket squares - men's formalwear
+    ("men", "ring"): "137856",  # Rings - men's jewelry
+    ("women", "ring"): "164343",  # Rings - women's jewelry
+    ("women", "romper"): "63861",  # Rompers - women's clothing
+    ("men", "scarf"): "52366",  # Scarves - men's accessories
+    ("women", "scarf"): "45238",  # Scarves - women's accessories
+    ("men", "shoes"): "93427",  # Shoes - men's shoes
+    ("women", "shoes"): "3034",  # Shoes - women's shoes
+    ("men", "shorts"): "15689",  # Shorts - men's clothing
+    ("women", "shorts"): "11555",  # Shorts - women's clothing
+    ("women", "skirt"): "63864",  # Skirts - women's clothing
+    ("men", "socks"): "4250",  # Socks - men's clothing
+    ("women", "socks"): "11511",  # Socks - women's clothing
+    ("men", "sunglasses"): "179247",  # Sunglasses - unisex
+    ("women", "sunglasses"): "179247",  # Sunglasses - unisex
+    ("men", "suspenders"): "15662",  # Suspenders - men's accessories
+    ("men", "swimwear"): "15690",  # Swimwear - men's swimwear
+    ("women", "swimwear"): "63867",  # Swimwear - women's swimwear
+    ("men", "tie clip"): "15662",  # Tie clips and accessories - men's formalwear
+    ("women", "top"): "53159",  # Tops - women's clothing
+    ("men", "top"): "1059",  # Tops - men's clothing
+    ("men", "vest"): "15691",  # Vests - men's clothing
+    ("women", "vest"): "63866",  # Vests - women's clothing
+    ("men", "watch"): "31387",  # Watches - men's accessories
+    ("women", "watch"): "31387",  # Watches - women's accessories
+    ("men", "t-shirt"): "15687",  # T-shirts - men's clothing
+    ("women", "t-shirt"): "15724",  # T-shirts - women's clothing
+    ("men", "jeans"): "11483",  # Jeans - men's clothing
+    ("women", "jeans"): "11554",  # Jeans - women's clothing
+    ("men", "jacket"): "57988",  # Jackets - men's clothing
+    ("women", "jacket"): "63862",  # Jackets - women's clothing
+    ("men", "coat"): "57988",  # Coats - men's clothing
+    ("women", "coat"): "63862",  # Coats - women's clothing
+    ("men", "suit"): "3001",  # Suits - men's formalwear
+    ("women", "suit"): "63865",  # Suits - women's formalwear
+    ("men", "sweater"): "11484",  # Sweaters - men's clothing
+    ("women", "sweater"): "63866",  # Sweaters - women's clothing
+    ("women", "blouse"): "53159",  # Blouses - women's clothing
+    ("men", "hoodie"): "11484",  # Hoodies - men's clothing
+    ("women", "hoodie"): "63866",  # Hoodies - women's clothing
+    ("women", "cardigan"): "63866",  # Cardigans - women's clothing
+    ("men", "cardigan"): "11484",  # Cardigans - men's clothing
+    ("women", "leggings"): "169001",  # Leggings - women's clothing
+    ("women", "bikini"): "63867",  # Bikinis - women's swimwear
+    ("women", "gown"): "15720",  # Gowns - women's formalwear
+    ("men", "cape"): "57988",  # Capes - men's clothing
+    ("women", "cape"): "63862",  # Capes - women's clothing
+    ("men", "mask"): "183477",  # Masks - unisex accessories
+    ("women", "mask"): "183477",  # Masks - unisex accessories
+    ("men", "overalls"): "57988",  # Overalls - men's clothing
+    ("women", "overalls"): "11554",  # Overalls - women's clothing
+    ("men", "poncho"): "57988",  # Ponchos - men's clothing
+    ("women", "poncho"): "63862",  # Ponchos - women's clothing
+    ("women", "sarong"): "63867",  # Sarongs - women's swimwear
+    ("women", "shawl"): "45238",  # Shawls - women's accessories
+    ("men", "sleepwear"): "11510",  # Sleepwear - men's clothing
+    ("women", "sleepwear"): "63861",  # Sleepwear - women's clothing
+    ("men", "tracksuit"): "15692",  # Tracksuits - men's clothing
+    ("women", "tracksuit"): "11554",  # Tracksuits - women's clothing
+    ("men", "trousers"): "57989",  # Trousers - men's clothing
+    ("women", "trousers"): "63863",  # Trousers - women's clothing
+    ("men", "backpack"): "169291",  # Backpacks - unisex accessories
+    ("women", "backpack"): "169291",  # Backpacks - unisex accessories
+    ("women", "bandeau"): "63867",  # Bandeaus - women's clothing
+    ("men", "beanie"): "52382",  # Beanies - unisex hats
+    ("women", "beanie"): "52382",  # Beanies - unisex hats
+    ("men", "beret"): "52382",  # Berets - unisex hats
+    ("women", "beret"): "52382",  # Berets - unisex hats
+    ("men", "bermuda shorts"): "15689",  # Bermuda shorts - men's clothing
+    ("women", "bermuda shorts"): "11555",  # Bermuda shorts - women's clothing
+    ("men", "biker jacket"): "57988",  # Biker jackets - men's clothing
+    ("women", "biker jacket"): "63862",  # Biker jackets - women's clothing
+    ("women", "bikini bottom"): "63867",  # Bikini bottoms - women's swimwear
+    ("women", "bikini set"): "63867",  # Bikini sets - women's swimwear
+    ("women", "bikini top"): "63867",  # Bikini tops - women's swimwear
+    ("men", "blazer"): "3002",  # Blazers - men's formalwear
+    ("women", "blazer"): "63865",  # Blazers - women's formalwear
+    ("women", "boatneck/bateau"): "53159",  # Boatneck tops - women's clothing
+    ("men", "bomber"): "57988",  # Bomber jackets - men's clothing
+    ("women", "bomber"): "63862",  # Bomber jackets - women's clothing
+    ("women", "booties"): "3034",  # Booties - women's shoes
+    ("women", "bra"): "63853",  # Bras - women's undergarments
+    ("unisex", "bucket hat"): "52382",  # Bucket hats - unisex hats
+    ("women", "camisole"): "11514",  # Camisoles - women's clothing
+    ("men", "cape/poncho"): "57988",  # Capes and ponchos - men's clothing
+    ("women", "cape/poncho"): "63862",  # Capes and ponchos - women's clothing
+    ("women", "capris"): "63863",  # Capris - women's clothing
+    ("women", "capsleeve"): "53159",  # Capsleeve tops - women's clothing
+    ("men", "cargo pants"): "57989",  # Cargo pants - men's clothing
+    ("women", "cargo pants"): "63863",  # Cargo pants - women's clothing
+    ("men", "cargo shorts"): "15689",  # Cargo shorts - men's clothing
+    ("women", "cargo shorts"): "11555",  # Cargo shorts - women's clothing
+    ("men", "denim jacket"): "57988",  # Denim jackets - men's clothing
+    ("women", "denim jacket"): "63862",  # Denim jackets - women's clothing
+    ("men", "duffle coat"): "57988",  # Duffle coats - men's clothing
+    ("women", "duffle coat"): "63862",  # Duffle coats - women's clothing
+    ("unisex", "fedora"): "52382",  # Fedoras - unisex hats
+    ("men", "field jacket"): "57988",  # Field jackets - men's clothing
+    ("women", "field jacket"): "63862",  # Field jackets - women's clothing
+    ("women", "flats"): "3034",  # Flats - women's shoes
+    ("men", "fleece"): "11484",  # Fleece clothing - men's clothing
+    ("women", "fleece"): "63866",  # Fleece clothing - women's clothing
+    ("men", "flip-flops"): "11504",  # Flip-flops - men's shoes
+    ("women", "flip-flops"): "3034",  # Flip-flops - women's shoes
+    ("women", "floppy hat"): "3004",  # Floppy hats - women's hats
+    ("women", "halter"): "11514",  # Halter tops - women's clothing
+    ("men", "loafers"): "93427",  # Loafers - men's shoes
+    ("women", "loafers"): "3034",  # Loafers - women's shoes
+    ("women", "maxi dress"): "63861",  # Maxi dresses - women's clothing
+    ("women", "maxi skirt"): "63864",  # Maxi skirts - women's clothing
+    ("women", "midi dress"): "63861",  # Midi dresses - women's clothing
+    ("women", "midi skirt"): "63864",  # Midi skirts - women's clothing
+    ("women", "mini dress"): "63861",  # Mini dresses - women's clothing
+    ("women", "mini skirt"): "63864",  # Mini skirts - women's clothing
+    ("women", "mockneck"): "53159",  # Mockneck tops - women's clothing
+    ("women", "mules"): "3034",  # Mules - women's shoes
+    ("unisex", "newsboy/flat cap"): "52382",  # Newsboy caps - unisex hats
+    ("women", "one piece swimsuit"): "63867",  # One-piece swimsuits - women's swimwear
+    ("men", "oxfords"): "93427",  # Oxfords - men's shoes
+    ("women", "oxfords"): "3034",  # Oxfords - women's shoes
+    ("men", "pajamas"): "11510",  # Pajamas - men's sleepwear
+    ("women", "pajamas"): "63861",  # Pajamas - women's sleepwear
+    ("men", "parka"): "57988",  # Parkas - men's clothing
+    ("women", "parka"): "63862",  # Parkas - women's clothing
+    ("men", "peacoat"): "57988",  # Peacoats - men's clothing
+    ("women", "peacoat"): "63862",  # Peacoats - women's clothing
+    ("men", "polo"): "1059",  # Polo shirts - men's clothing
+    ("women", "polo"): "53159",  # Polo shirts - women's clothing
+    ("men", "puffer coat"): "57988",  # Puffer coats - men's clothing
+    ("women", "puffer coat"): "63862",  # Puffer coats - women's clothing
+    ("men", "puffer vest"): "15691",  # Puffer vests - men's clothing
+    ("women", "puffer vest"): "63866",  # Puffer vests - women's clothing
+    ("women", "pumps"): "3034",  # Pumps - women's shoes
+    ("men", "rain boots"): "93427",  # Rain boots - men's shoes
+    ("women", "rain boots"): "3034",  # Rain boots - women's shoes
+    ("men", "sandals"): "11504",  # Sandals - men's shoes
+    ("women", "sandals"): "3034",  # Sandals - women's shoes
+    ("women", "satchel"): "169291",  # Satchels - women's bags
+    ("men", "shirt"): "1059",  # Shirts - men's clothing
+    ("women", "shirt"): "53159",  # Shirts - women's clothing
+    ("men", "short-sleeve"): "1059",  # Short-sleeve shirts - men's clothing
+    ("women", "short-sleeve"): "53159",  # Short-sleeve tops - women's clothing
+    ("women", "shortalls"): "11554",  # Shortalls - women's clothing
+    ("women", "sleeveless"): "53159",  # Sleeveless tops - women's clothing
+    ("men", "sleeveless"): "1059",  # Sleeveless shirts - men's clothing
+    ("women", "shoulder bag"): "169291",  # Shoulder bags - women's accessories
+    ("men", "sneakers"): "93427",  # Sneakers - men's shoes
+    ("women", "sneakers"): "3034",  # Sneakers - women's shoes
+    ("women", "spaghetti strap"): "11514",  # Spaghetti strap tops - women's clothing
+    ("women", "strapless"): "53159",  # Strapless tops - women's clothing
+    ("men", "suit jacketsuit pants"): "3001",  # Suit jackets and pants - men's formalwear
+    ("men", "sweater vest"): "11484",  # Sweater vests - men's clothing
+    ("women", "sweater vest"): "63866",  # Sweater vests - women's clothing
+    ("men", "sweatpants"): "11510",  # Sweatpants - men's clothing
+    ("women", "sweatpants"): "11554",  # Sweatpants - women's clothing
+    ("men", "sweatshirt"): "11484",  # Sweatshirts - men's clothing
+    ("women", "sweatshirt"): "63866",  # Sweatshirts - women's clothing
+    ("men", "swim trunks"): "15690",  # Swim trunks - men's swimwear
+    ("men", "tank"): "15692",  # Tank tops - men's clothing
+    ("women", "tank"): "11514",  # Tank tops - women's clothing
+    ("women", "tote bag"): "169291",  # Tote bags - women's accessories
+    ("unisex", "trapper hat"): "52382",  # Trapper hats - unisex hats
+    ("men", "trenchcoat"): "57988",  # Trenchcoats - men's clothing
+    ("women", "trenchcoat"): "63862",  # Trenchcoats - women's clothing
+    ("men", "waistcoat"): "15691",  # Waistcoats - men's formalwear
+    ("women", "waistcoat"): "63865",  # Waistcoats - women's formalwear
+    ("women", "wedges"): "3034",  # Wedge shoes - women's shoes
+    ("women", "wide leg pants"): "63863",  # Wide leg pants - women's clothing
+    ("women", "wristlet and clutch"): "169291",  # Wristlets and clutches - women's accessories
 }
+
 
 
 # Define your default category
@@ -484,12 +559,15 @@ def get_gender(url_image_data,face_model,gender_model):
                                         # Determine the most likely gender
                                         top_gender = max(concepts_list, key=lambda concept: concept.value).name
                                         #st.write(f"Top gender: {top_gender}")
-                                        return top_gender
+                                        if top_gender == 'masculine':
+                                            return 'men'
+                                        else:
+                                            return 'women'
                                 except Exception as e:
                                     st.write(f"Error occurred: {str(e)}")
         except Exception as e:
             st.write(f'Error occurred: {e}')
-    return 'Feminine'
+    return 'women'
 
 
 def crop_image(image_path, top_row, left_col, bottom_row, right_col):
@@ -499,7 +577,7 @@ def crop_image(image_path, top_row, left_col, bottom_row, right_col):
     return concept_image.crop(crop)
 
 # eBay Vision Search API integration with category mapping
-def search_ebay_with_concepts(concepts, ebay_access_token, affiliate_id):
+def search_ebay_with_concepts(concepts, ebay_access_token, affiliate_id,gender):
     headers = {
         "Authorization": f"Bearer {ebay_access_token}",
         "Content-Type": "application/json"
@@ -512,7 +590,7 @@ def search_ebay_with_concepts(concepts, ebay_access_token, affiliate_id):
         data = {
             "image": base64.b64encode(image_bytes).decode('utf-8')
         }
-        concept_name = extract_concepts(str(concept['tags']))
+        concept_name = extract_concepts(str(concept['tags'])),gender
         category_id = get_category(concept_name)
         if category_id:
             endpoint = f"{EBAY_API_ENDPOINT}?q={concept_name}&category_ids={category_id}&aspect_filter=categoryId:{category_id}"
@@ -655,7 +733,7 @@ def main():
 
         # Send user concepts to eBay Vision Search API and get top 3 links
         if tagged_concepts:
-            tagged_concepts = search_ebay_with_concepts(tagged_concepts, EBAY_ACCESS_TOKEN,EBAY_AFFILIATE_ID)
+            tagged_concepts = search_ebay_with_concepts(tagged_concepts, EBAY_ACCESS_TOKEN,EBAY_AFFILIATE_ID,gender)
             st.write("eBay Search Results:")
             for concept in tagged_concepts:
                 concept_name = concept['concept_name']
