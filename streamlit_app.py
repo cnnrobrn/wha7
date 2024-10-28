@@ -558,7 +558,7 @@ def get_gender(url_image_data,face_model,gender_model):
                                         #st.write(gender)
                                         # Determine the most likely gender
                                         top_gender = max(concepts_list, key=lambda concept: concept.value).name
-                                        #st.write(f"Top gender: {top_gender}")
+                                        st.write(f"Top gender: {top_gender}")
                                         if top_gender == 'masculine':
                                             return 'men'
                                         else:
