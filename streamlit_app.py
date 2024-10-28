@@ -454,7 +454,7 @@ def get_gender(url_image_data,face_model,gender_model):
             prediction_response = face_model.predict_by_url(url, input_type="image")
             if prediction_response.outputs:
                 face_data.append({"prediction": prediction_response})
-                st.write(face_data[0]['prediction'])
+                #st.write(face_data[0]['prediction'])
                 if face_data[0]['prediction'].outputs:
                     regions = face_data[0]['prediction'].outputs[0].data.regions
                     for region in regions:
@@ -480,7 +480,10 @@ def get_gender(url_image_data,face_model,gender_model):
                                     if prediction_response.outputs:
                                         concepts_list = prediction_response.outputs[0].data.concepts
                                         gender.append(concepts_list)
-                                        st.write(gender)
+                                        #st.write(gender)
+                                        # Determine the most likely gender
+                                        top_gender = max(concepts_list, key=lambda concept: concept.value).name
+                                        st.write(f"Top gender: {top_gender}")
                                 except Exception as e:
                                     st.write(f"Error occurred: {str(e)}")
         except Exception as e:
