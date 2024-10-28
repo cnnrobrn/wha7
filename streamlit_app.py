@@ -591,6 +591,7 @@ def search_ebay_with_concepts(concepts, ebay_access_token, affiliate_id,gender):
             "image": base64.b64encode(image_bytes).decode('utf-8')
         }
         concept_name = extract_concepts(str(concept['tags'])),gender
+        st.write(concept_name)
         category_id = get_category(concept_name)
         if category_id:
             endpoint = f"{EBAY_API_ENDPOINT}?q={concept_name}&category_ids={category_id}&aspect_filter=categoryId:{category_id}"
