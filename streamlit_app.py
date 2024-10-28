@@ -455,7 +455,7 @@ def get_gender(url_image_data,face_model,gender_model):
             if prediction_response.outputs:
                 face_data["prediction"] = prediction_response
                 st.write(face_data['prediction'])
-                if data['prediction'].outputs:
+                if face_data['prediction'].outputs:
                     regions = data['prediction'].outputs[0].data.regions
                     for region in regions:
                         top_row = region.region_info.bounding_box.top_row
@@ -486,13 +486,13 @@ def get_gender(url_image_data,face_model,gender_model):
 
                                         concepts_list = prediction_response.outputs[0].data.concepts
                                         # Save the concepts to data["tags"]
-                                        gender["tags"]=concepts_list
+                                        gender[0]=concepts_list
                                         st.write (gender)
                                 except Exception as e:
                                     st.write(f"Error occurred: {str(e)}")
         except Exception as e:
             st.write(f'Error occurred{e}')
-    return 'null'
+    return gender[0]
 
 
 def crop_image(image_path, top_row, left_col, bottom_row, right_col):
