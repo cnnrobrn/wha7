@@ -483,12 +483,13 @@ def get_gender(url_image_data,face_model,gender_model):
                                         #st.write(gender)
                                         # Determine the most likely gender
                                         top_gender = max(concepts_list, key=lambda concept: concept.value).name
-                                        st.write(f"Top gender: {top_gender}")
+                                        #st.write(f"Top gender: {top_gender}")
+                                        return top_gender
                                 except Exception as e:
                                     st.write(f"Error occurred: {str(e)}")
         except Exception as e:
             st.write(f'Error occurred: {e}')
-    return 'null'
+    return 'Feminine'
 
 
 def crop_image(image_path, top_row, left_col, bottom_row, right_col):
@@ -639,9 +640,10 @@ def main():
 
         # Analyze images using Clarifai model
         prediction_responses = analyze_images(url_image_data, detector_model)
-        gender = get_gender(url_image_data,face_model,gender_model)
         st.success("Predictions generated", icon="✅")
 
+        gender = get_gender(url_image_data,face_model,gender_model)
+        st.success(f"Gender is {gender}", icon="✅")
 
         # User interaction
         st.write(f"Processing images from phone number: {user_phone}")
