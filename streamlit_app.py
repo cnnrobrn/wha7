@@ -595,7 +595,7 @@ def search_ebay_with_concepts(concepts, ebay_access_token, affiliate_id,gender):
         category_id = get_category(concept_name)
         st.write(category_id)
         if category_id:
-            endpoint = f"{EBAY_API_ENDPOINT}?q={concept_name}&category_ids={category_id}&aspect_filter=categoryId:{category_id}"
+            endpoint = f"{EBAY_API_ENDPOINT}?category_ids={category_id}"
             st.write(endpoint)
         else:
             endpoint = EBAY_API_ENDPOINT
