@@ -699,10 +699,14 @@ def send_results_via_twilio(client, to_number, concepts):
 
 
 def get_color(image_bytes):
-    color_model = init_clarifai_color(CLARIFAI_PAT)
-    prediction_response = color_model.predict_by_bytes(image_bytes, input_type='image')
-    st.write(f"prediction color: {prediction_response.outputs[0].data.concepts}")
-    return "blue"
+    try:
+        color_model = init_clarifai_color(CLARIFAI_PAT)
+        prediction_response = color_model.predict_by_bytes(image_bytes, input_type='image')
+        st.write(f"prediction color: {prediction_response.outputs[0].data.concepts}")
+        return "blue"
+    except Exception as e:
+        st.error(f"Error occurred while predicting color: {str(e)}")
+        return "unknown"
 
 
 def main():
