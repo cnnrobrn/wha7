@@ -701,7 +701,7 @@ def send_results_via_twilio(client, to_number, concepts):
 def get_color(image_bytes):
     color_model = init_clarifai_color(CLARIFAI_PAT)
     prediction_response = color_model.predict_by_bytes(image_bytes, input_type='image')
-    st.write(prediction_response.outputs[0].data.concepts[0])
+    st.write(prediction_response.outputs[0].data.concepts)
     return "blue"
 
 
