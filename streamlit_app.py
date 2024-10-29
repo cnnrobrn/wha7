@@ -596,13 +596,13 @@ def search_ebay_with_concepts(concepts, ebay_access_token, affiliate_id,gender):
             "image": base64.b64encode(image_bytes).decode('utf-8')
         }
         concept_name = gender,extract_concepts(str(concept['tags']))
-        st.write(concept_name)
+        st.write(f"concept name:{concept_name}")
         color = get_color(image_bytes)
         category_id = get_category(concept_name)
-        st.write(category_id)
+        st.write(f"category id:{category_id}")
         if category_id:
             endpoint = f"{EBAY_API_ENDPOINT}?category_ids={category_id}&aspect_filter=categoryId:{category_id},Color:{color}"
-            st.write(endpoint)
+            st.write(f"endpoint{endpoint}")
         else:
             endpoint = EBAY_API_ENDPOINT
             st.warning(f"No category mapping found for concept '{concept_name}'. Using default search.")
@@ -701,7 +701,7 @@ def send_results_via_twilio(client, to_number, concepts):
 def get_color(image_bytes):
     color_model = init_clarifai_color(CLARIFAI_PAT)
     prediction_response = color_model.predict_by_bytes(image_bytes, input_type='image')
-    st.write(prediction_response.outputs[0].data.concepts)
+    st.write(f"prediction color: {prediction_response.outputs[0].data.concepts}")
     return "blue"
 
 
@@ -743,7 +743,7 @@ def main():
         st.success("Concepts analyzed", icon="✅")
 
         tagged_concepts=add_tags(user_concepts,label_model)
-        st.write(tagged_concepts)
+        st.write(f'tagged concepts{tagged_concepts}')
         st.success("Concepts tagged", icon="✅")
 
         # Send user concepts to eBay Vision Search API and get top 3 links
