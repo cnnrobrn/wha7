@@ -732,7 +732,7 @@ def main():
         st.success("Concepts analyzed", icon="✅")
 
         tagged_concepts=add_tags(user_concepts,label_model)
-        print(tagged_concepts)
+        st.write(tagged_concepts)
         st.success("Concepts tagged", icon="✅")
 
         # Send user concepts to eBay Vision Search API and get top 3 links
