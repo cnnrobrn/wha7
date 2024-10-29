@@ -335,6 +335,11 @@ def init_clarifai_gender(key):
     model_url = "https://clarifai.com/clarifai/main/models/gender-demographics-recognition"
     return Model(url=model_url, pat=key)   
 
+def init_clarifai_color(key):
+    st.success('Clarifai gender initialized!', icon="✅")
+    model_url = "https://clarifai.com/clarifai/main/models/color-recognition"
+    return Model(url=model_url, pat=key)   
+
 # Twilio message processing
 def create_directory_for_number(directory_path):
     if not directory_path.exists():
@@ -592,10 +597,11 @@ def search_ebay_with_concepts(concepts, ebay_access_token, affiliate_id,gender):
         }
         concept_name = gender,extract_concepts(str(concept['tags']))
         st.write(concept_name)
+        color = get_color(image_bytes)
         category_id = get_category(concept_name)
         st.write(category_id)
         if category_id:
-            endpoint = f"{EBAY_API_ENDPOINT}?category_ids={category_id}"
+            endpoint = f"{EBAY_API_ENDPOINT}?category_ids={category_id}&aspect_filter=categoryId:{category_id},Color:{color}"
             st.write(endpoint)
         else:
             endpoint = EBAY_API_ENDPOINT
@@ -692,6 +698,11 @@ def send_results_via_twilio(client, to_number, concepts):
             st.error(f"Failed to send SMS for {concept_name}: {str(e)}")
 
 
+def get_color(image_bytes):
+    color_model = init_clarifai_color(CLARIFAI_PAT)
+    prediction_response = color_model.predict_by_bytes(image_bytes, input_type='image')
+    st.success(f"Color prediction generated{prediction_response}", icon="✅")
+    return prediction_response.outputs[0].data.concepts[0].name
 
 
 def main():
