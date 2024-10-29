@@ -593,8 +593,10 @@ def search_ebay_with_concepts(concepts, ebay_access_token, affiliate_id,gender):
         concept_name = gender,extract_concepts(str(concept['tags']))
         st.write(concept_name)
         category_id = get_category(concept_name)
+        st.write(category_id)
         if category_id:
             endpoint = f"{EBAY_API_ENDPOINT}?q={concept_name}&category_ids={category_id}&aspect_filter=categoryId:{category_id}"
+            st.write(endpoint)
         else:
             endpoint = EBAY_API_ENDPOINT
             st.warning(f"No category mapping found for concept '{concept_name}'. Using default search.")
