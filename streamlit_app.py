@@ -371,29 +371,58 @@ def save_media(response, from_number, msg_sid, media_index):
             file.write(response.content)
     return file_path, file_name
 
+from collections import deque
+from pathlib import Path
+import streamlit as st
+
+# Initialize session state for unprocessed messages queue and processed messages set
+if 'unprocessed_messages_queue' not in st.session_state:
+    st.session_state.unprocessed_messages_queue = deque()
+
+if 'processed_message_sids' not in st.session_state:
+    st.session_state.processed_message_sids = set()
+
 def process_twilio_messages(client, twilio_number):
     messages = client.messages.list(to=twilio_number)
-    # Find the most recent message with media
-    recent_message = None
+
+    # Add new unprocessed messages to the queue
     for msg in messages:
-        if int(msg.num_media) > 0:
-            recent_message = msg
-            break  # Since messages are in descending order, break after the first message with media
-    if not recent_message:
-        st.error("No messages with media found.")
+        if int(msg.num_media) > 0 and msg.sid not in st.session_state.processed_message_sids:
+            st.session_state.unprocessed_messages_queue.append(msg)
+
+    if not st.session_state.unprocessed_messages_queue:
+        st.error("No new messages with media found.")
         return {}
+
+    # Iterate through the unprocessed messages
     message_data = {}
-    from_number = recent_message.from_
-    directory_path = Path(f"{FOLDER_PATH}/{from_number}")
-    create_directory_for_number(directory_path)
-    media_urls, file_paths, file_names = [], [], []
-    media_urls, file_paths, file_names = download_media(client.messages(recent_message.sid).media.list(), from_number, recent_message.sid)
-    message_data[from_number] = [{
-        "media_urls": media_urls,
-        "media_path": file_paths,
-        "file_names": file_names
-    }]
+    while st.session_state.unprocessed_messages_queue:
+        recent_message = st.session_state.unprocessed_messages_queue.popleft()
+        st.session_state.processed_message_sids.add(recent_message.sid)  # Mark as processed
+
+        from_number = recent_message.from_
+        directory_path = Path(f"{FOLDER_PATH}/{from_number}")
+        create_directory_for_number(directory_path)
+
+        # Download media and collect information
+        media_urls, file_paths, file_names = [], [], []
+        media_urls, file_paths, file_names = download_media(client.messages(recent_message.sid).media.list(), from_number, recent_message.sid)
+
+        # Store message data
+        if from_number not in message_data:
+            message_data[from_number] = []
+        message_data[from_number].append({
+            "media_urls": media_urls,
+            "media_path": file_paths,
+            "file_names": file_names
+        })
+
+    # Display summary of processed and unprocessed messages
+    st.write(f"Processed messages: {len(st.session_state.processed_message_sids)}")
+    st.write(f"Unprocessed messages in queue: {len(st.session_state.unprocessed_messages_queue)}")
+
     return message_data
+
 
 # Image listing and S3 integration
 def list_image_paths(folder_path, phone_number):
