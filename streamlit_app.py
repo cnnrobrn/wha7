@@ -815,12 +815,7 @@ def main(other_data):
         return list(message_data.values())[0]
     # In the main section, after processing the concepts and eBay links:
 
-
-
-
     # Delete photos at the end of the program
-
-
 
 # Main
 if __name__ == "__main__":
