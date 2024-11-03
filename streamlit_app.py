@@ -2,7 +2,6 @@ import os
 import requests
 from PIL import Image
 from io import BytesIO
-import streamlit as st
 import boto3
 import urllib
 from pathlib import Path
@@ -13,6 +12,9 @@ import re
 import shutil
 import json
 import time
+from collections import deque
+from pathlib import Path
+import streamlit as st
 
 
 # Fetch secrets from st.secrets
@@ -310,6 +312,16 @@ STYLISTIC_ITEMS = [
     "zebra"
 ]
 
+
+if 'unprocessed_messages_queue' not in st.session_state:
+    st.session_state.unprocessed_messages_queue = deque()
+
+if 'processed_message_sids' not in st.session_state:
+    st.session_state.processed_message_sids = set()
+
+if 'processed_media_urls' not in st.session_state:
+    st.session_state.processed_media_urls = set()
+
 # Initialize clients
 def init_twilio_client():
     st.success('Twilio initialized!', icon="✅")
@@ -349,12 +361,17 @@ def download_media(media_list, from_number, msg_sid):
     media_urls, file_paths, file_names = [], [], []
     for i, media in enumerate(media_list):
         media_url = f"https://api.twilio.com{media.uri.replace('.json', '')}"
+        # Skip processing if the media URL was already processed
+        if media_url in st.session_state.processed_media_urls:
+            continue
+        
         response = requests.get(media_url, auth=(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN))
         if response.status_code == 200:
             file_path, file_name = save_media(response, from_number, msg_sid, i)
             media_urls.append(media_url)
             file_paths.append(file_path)
             file_names.append(file_name)
+            st.session_state.processed_media_urls.add(media_url)  # Mark as processed
     return media_urls, file_paths, file_names
 
 def save_media(response, from_number, msg_sid, media_index):
@@ -370,17 +387,6 @@ def save_media(response, from_number, msg_sid, media_index):
         with open(file_path, "wb") as file:
             file.write(response.content)
     return file_path, file_name
-
-from collections import deque
-from pathlib import Path
-import streamlit as st
-
-# Initialize session state for unprocessed messages queue and processed messages set
-if 'unprocessed_messages_queue' not in st.session_state:
-    st.session_state.unprocessed_messages_queue = deque()
-
-if 'processed_message_sids' not in st.session_state:
-    st.session_state.processed_message_sids = set()
 
 def process_twilio_messages(client, twilio_number):
     messages = client.messages.list(to=twilio_number)
@@ -405,23 +411,24 @@ def process_twilio_messages(client, twilio_number):
         create_directory_for_number(directory_path)
 
         # Download media and collect information
-        media_urls, file_paths, file_names = [], [], []
         media_urls, file_paths, file_names = download_media(client.messages(recent_message.sid).media.list(), from_number, recent_message.sid)
 
         # Store message data
-        if from_number not in message_data:
-            message_data[from_number] = []
-        message_data[from_number].append({
-            "media_urls": media_urls,
-            "media_path": file_paths,
-            "file_names": file_names
-        })
+        if media_urls:  # Only add messages that have new, unprocessed media
+            if from_number not in message_data:
+                message_data[from_number] = []
+            message_data[from_number].append({
+                "media_urls": media_urls,
+                "media_path": file_paths,
+                "file_names": file_names
+            })
 
     # Display summary of processed and unprocessed messages
     st.write(f"Processed messages: {len(st.session_state.processed_message_sids)}")
     st.write(f"Unprocessed messages in queue: {len(st.session_state.unprocessed_messages_queue)}")
 
     return message_data
+
 
 
 # Image listing and S3 integration
