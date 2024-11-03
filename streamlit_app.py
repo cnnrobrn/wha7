@@ -738,7 +738,7 @@ def get_color(image_bytes):
         return "unknown"
 
 
-def main():
+def main(other_data):
     # Initialize clients and models
     client = init_twilio_client()
     detector_model = init_clarifai_model(CLARIFAI_PAT)
@@ -749,7 +749,7 @@ def main():
     EBAY_ACCESS_TOKEN = ebay_oauth_flow()
 
     # Process messages and extract images
-    message_data = process_twilio_messages(client, TWILIO_NUMBER)
+    message_data = other_data
 
     if not message_data:
         st.error("No messages with media to process.")
@@ -825,5 +825,5 @@ if __name__ == "__main__":
             message_data = list(other_data.values())[0]
             #st.write (other_data)
             if message_data != last_message:
-                last_message = main()
+                last_message = main(other_data)
                 message_data = last_message
