@@ -821,8 +821,9 @@ if __name__ == "__main__":
     last_message = ""
     while True:
         other_data = process_twilio_messages(client, TWILIO_NUMBER)
-        message_data = list(other_data.values())[0]
-        #st.write (other_data)
-        if message_data != last_message:
-            last_message = main()
-            message_data = last_message
+        if len(message_data)>0:
+            message_data = list(other_data.values())[0]
+            #st.write (other_data)
+            if message_data != last_message:
+                last_message = main()
+                message_data = last_message
