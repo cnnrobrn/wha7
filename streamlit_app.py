@@ -631,7 +631,7 @@ def search_ebay_with_concepts(concepts, ebay_access_token, affiliate_id,gender):
         data = {
             "image": base64.b64encode(image_bytes).decode('utf-8')
         }
-        concept_name = gender,extract_concepts(str(concept['concept_name']))
+        concept_name = gender,concept['concept_name'] #extract_concepts(str(concept['concept_name']))
         st.write(f"concept name:{concept_name}")
         color = get_color(image_bytes)
         category_id = get_category(concept_name)
