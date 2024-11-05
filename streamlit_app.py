@@ -324,31 +324,31 @@ if 'processed_media_urls' not in st.session_state:
 
 # Initialize clients
 def init_twilio_client():
-    st.success('Twilio initialized!', icon="✅")
+    #st.success('Twilio initialized!', icon="✅")
     return Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
 def init_clarifai_model(key):
     model_url = "https://clarifai.com/clarifai/main/models/apparel-detection"
-    st.success('Clarifai initialized!', icon="✅")
+    #st.success('Clarifai initialized!', icon="✅")
     return Model(url=model_url, pat=key)
 
 def init_clarifai_labels(key):
-    st.success('Clarifai labeling initialized!', icon="✅")
+    #st.success('Clarifai labeling initialized!', icon="✅")
     model_url = "https://clarifai.com/clarifai/main/models/apparel-classification-v2"
     return Model(url=model_url, pat=key)
  
 def init_clarifai_face(key):
-    st.success('Clarifai face initialized!', icon="✅")
+    #st.success('Clarifai face initialized!', icon="✅")
     model_url = "https://clarifai.com/clarifai/main/models/face-detection"
     return Model(url=model_url, pat=key)
 
 def init_clarifai_gender(key):
-    st.success('Clarifai gender initialized!', icon="✅")
+    #st.success('Clarifai gender initialized!', icon="✅")
     model_url = "https://clarifai.com/clarifai/main/models/gender-demographics-recognition"
     return Model(url=model_url, pat=key)   
 
 def init_clarifai_color(key):
-    st.success('Clarifai gender initialized!', icon="✅")
+    #st.success('Clarifai gender initialized!', icon="✅")
     model_url = "https://clarifai.com/clarifai/main/models/color-recognition"
     return Model(url=model_url, pat=key)   
 
@@ -397,7 +397,7 @@ def process_twilio_messages(client, twilio_number):
             st.session_state.unprocessed_messages_queue.append(msg)
 
     if not st.session_state.unprocessed_messages_queue:
-        st.error("No new messages with media found.")
+        #st.error("No new messages with media found.")
         return {}
 
     # Iterate through the unprocessed messages
@@ -695,7 +695,7 @@ def ebay_oauth_flow():
     if response.status_code == 200:
         token_data = response.json()
         access_token = token_data.get("access_token")
-        st.success('eBay Authorized!', icon="✅")
+        #st.success('eBay Authorized!', icon="✅")
         return access_token
     else:
         st.error(f"Failed to obtain eBay OAuth token: {response.status_code} - {response.text}")
@@ -704,7 +704,7 @@ def ebay_oauth_flow():
 def delete_photos(folder_path):
     if os.path.exists(folder_path):
         shutil.rmtree(folder_path)
-        st.success("Photos have been deleted.", icon="✅")
+        #st.success("Photos have been deleted.", icon="✅")
     else:
         st.error("Folder does not exist.")
 
@@ -729,7 +729,7 @@ def send_results_via_twilio(client, to_number, concepts):
                 from_=TWILIO_NUMBER,
                 to=to_number
             )
-            st.success(f"Results for {concept_name} sent via SMS to {to_number}", icon="✅")
+            #st.success(f"Results for {concept_name} sent via SMS to {to_number}", icon="✅")
         except Exception as e:
             st.error(f"Failed to send SMS for {concept_name}: {str(e)}")
 
@@ -768,23 +768,23 @@ def main(other_data):
         # List image paths for the user
         image_data = list_image_paths(FOLDER_PATH, user_phone)
         url_image_data = s3_write_urls(image_data)
-        st.success("Written to S3", icon="✅")
+        #st.success("Written to S3", icon="✅")
 
         # Analyze images using Clarifai model
         prediction_responses = analyze_images(url_image_data, detector_model)
-        st.success("Predictions generated", icon="✅")
+        #st.success("Predictions generated", icon="✅")
 
         gender = get_gender(url_image_data,face_model,gender_model)
-        st.success(f"Gender is {gender}", icon="✅")
+        #st.success(f"Gender is {gender}", icon="✅")
 
         # User interaction
-        st.write(f"Processing images from phone number: {user_phone}")
+        #st.write(f"Processing images from phone number: {user_phone}")
         user_concepts = extract_user_concepts(prediction_responses, user_phone)
-        st.success("Concepts analyzed", icon="✅")
+        #st.success("Concepts analyzed", icon="✅")
 
         tagged_concepts=add_tags(user_concepts,label_model)
-        st.write(f'tagged concepts{tagged_concepts}')
-        st.success("Concepts tagged", icon="✅")
+        #st.write(f'tagged concepts{tagged_concepts}')
+        #st.success("Concepts tagged", icon="✅")
 
         # Send user concepts to eBay Vision Search API and get top 3 links
         if tagged_concepts:
