@@ -1,4 +1,3 @@
-```python
 """Social media service for the Wha7 application.
 
 This service handles all social media integrations including:
@@ -325,4 +324,3 @@ async def get_social_service(
         ai_service=ai_service,
         redis_client=redis
     )
-```
