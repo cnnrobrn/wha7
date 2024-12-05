@@ -11,14 +11,17 @@ It handles all core application setup including:
 - OpenAPI/Swagger documentation configuration
 """
 
+# Standard library imports
+import time
+import logging
+from contextlib import asynccontextmanager
+
+# FastAPI imports
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
-import time
-import logging
-from contextlib import asynccontextmanager
 
 # Internal imports
 from app.core.config import get_settings
@@ -28,8 +31,16 @@ from app.api.v1.router import api_router
 from app.core.exceptions import AppException
 from app.core.middleware import (
     RequestLoggingMiddleware,
-    ResponseTimeMiddleware
+    ResponseTimeMiddleware,
+    RateLimitMiddleware
 )
+
+# Service imports
+from app.services.ai_processing import AIService
+from app.services.search import SearchService
+from app.services.image_processing import ImageProcessingService
+from app.services.social_media import SocialMediaService
+from app.services.messaging import MessageService
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -48,9 +59,13 @@ async def lifespan(app: FastAPI):
         await init_db()
         logger.info("Database initialized successfully")
         
-        # Additional startup tasks (e.g., initialize AI clients, cache, etc.)
-        # await initialize_ai_services()
-        # await initialize_cache()
+        # Initialize services
+        app.state.ai_service = await AIService()
+        app.state.search_service = await SearchService()
+        app.state.image_service = await ImageProcessingService()
+        app.state.social_service = await SocialMediaService()
+        app.state.message_service = await MessageService()
+        logger.info("Services initialized successfully")
         
         yield  # Application runs here
         
@@ -58,11 +73,14 @@ async def lifespan(app: FastAPI):
         logger.error(f"Startup failed: {str(e)}")
         raise
     
-    # Shutdown
     finally:
         logger.info("Shutting down application...")
-        # Cleanup tasks here
-        # await cleanup_connections()
+        # Cleanup services
+        await app.state.ai_service.close()
+        await app.state.search_service.close()
+        await app.state.image_service.close()
+        await app.state.social_service.close()
+        await app.state.message_service.close()
         logger.info("Cleanup completed")
 
 def create_application() -> FastAPI:
@@ -92,6 +110,7 @@ def create_application() -> FastAPI:
     # Add custom middleware
     app.add_middleware(ResponseTimeMiddleware)
     app.add_middleware(RequestLoggingMiddleware)
+    app.add_middleware(RateLimitMiddleware)
     
     # Register exception handlers
     @app.exception_handler(AppException)
@@ -124,21 +143,25 @@ def create_application() -> FastAPI:
         Checks critical service dependencies.
         """
         try:
-            # Get database session
+            # Check database connection
             async with get_session() as session:
-                # Simple query to check database connection
                 await session.execute("SELECT 1")
+            
+            # Check service statuses
+            services_status = {
+                "database": "connected",
+                "ai_service": app.state.ai_service.status if hasattr(app.state, 'ai_service') else "not_initialized",
+                "search_service": app.state.search_service.status if hasattr(app.state, 'search_service') else "not_initialized",
+                "image_service": app.state.image_service.status if hasattr(app.state, 'image_service') else "not_initialized",
+                "social_service": app.state.social_service.status if hasattr(app.state, 'social_service') else "not_initialized",
+                "message_service": app.state.message_service.status if hasattr(app.state, 'message_service') else "not_initialized"
+            }
             
             return {
                 "status": "healthy",
                 "timestamp": time.time(),
                 "version": app.version,
-                "services": {
-                    "database": "connected",
-                    # Add other service checks here
-                    # "cache": await check_cache(),
-                    # "ai_service": await check_ai_service()
-                }
+                "services": services_status
             }
         except Exception as e:
             logger.error(f"Health check failed: {str(e)}")
