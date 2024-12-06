@@ -95,10 +95,10 @@ class Settings(BaseSettings):
     """Main application settings with environment-specific configurations"""
     
     # Basic application settings
-    APP_NAME: str = "Wha7"
+    APP_NAME: str = "Wha7App"
     APP_VERSION: str = "2.0.0"
     DEBUG: bool = False
-    ENVIRONMENT: EnvironmentType = EnvironmentType.DEVELOPMENT
+    ENVIRONMENT: EnvironmentType = EnvironmentType.PRODUCTION
     
     # Security settings
     SECRET_KEY: str
