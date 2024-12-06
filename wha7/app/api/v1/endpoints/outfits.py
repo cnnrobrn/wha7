@@ -34,7 +34,84 @@ from app.models.domain.outfit import (
 # Initialize router and logger
 router = APIRouter(prefix="/outfits", tags=["outfits"])
 logger = get_logger(__name__)
+# In app/api/v1/endpoints/outfits.py
 
+@router.get("/data_all")
+async def get_global_outfits(
+    page: int = Query(1, ge=1),
+    per_page: int = Query(10, ge=1, le=100),
+    db: AsyncSession = Depends(get_session)
+):
+    """Get global outfits feed with pagination."""
+    try:
+        skip = (page - 1) * per_page
+        
+        query = (
+            select(Outfit)
+            .options(selectinload(Outfit.items))
+            .order_by(desc(Outfit.created_at))
+            .offset(skip)
+            .limit(per_page + 1)  # Get one extra to check if there's more
+        )
+        
+        result = await db.execute(query)
+        outfits = result.scalars().all()
+        
+        has_more = len(outfits) > per_page
+        outfits = outfits[:per_page]  # Remove extra item
+        
+        return {
+            "outfits": outfits,
+            "has_more": has_more
+        }
+    except Exception as e:
+        logger.error("Failed to get global outfits", error=e)
+        raise HTTPException(status_code=500, detail="Failed to get outfits")
+
+@router.get("/data")
+async def get_personal_outfits(
+    phone_number: str = Query(...),
+    instagram_username: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    per_page: int = Query(10, ge=1, le=100),
+    db: AsyncSession = Depends(get_session)
+):
+    """Get personal outfits feed."""
+    try:
+        skip = (page - 1) * per_page
+        
+        # Build query based on provided filters
+        query = select(Outfit).options(selectinload(Outfit.items))
+        
+        if instagram_username:
+            query = query.join(PhoneNumber).where(
+                PhoneNumber.instagram_username == instagram_username
+            )
+        else:
+            query = query.join(PhoneNumber).where(
+                PhoneNumber.phone_number == phone_number
+            )
+            
+        query = (
+            query.order_by(desc(Outfit.created_at))
+            .offset(skip)
+            .limit(per_page + 1)
+        )
+        
+        result = await db.execute(query)
+        outfits = result.scalars().all()
+        
+        has_more = len(outfits) > per_page
+        outfits = outfits[:per_page]
+        
+        return {
+            "outfits": outfits,
+            "has_more": has_more
+        }
+    except Exception as e:
+        logger.error("Failed to get personal outfits", error=e)
+        raise HTTPException(status_code=500, detail="Failed to get outfits")
+    
 @router.post("/", response_model=OutfitResponse)
 @monitor_performance("create_outfit")
 async def create_outfit(

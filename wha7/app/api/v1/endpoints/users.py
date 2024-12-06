@@ -302,7 +302,37 @@ async def process_referral_code(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to process referral code"
         )
+# In app/api/v1/endpoints/users.py
 
+@router.post("/user/status")
+async def check_user_status(
+    request: Request,
+    db: AsyncSession = Depends(get_session)
+):
+    """Check user activation status."""
+    try:
+        data = await request.json()
+        phone_number = data.get("phone_number")
+        
+        if not phone_number:
+            raise HTTPException(status_code=400, detail="Missing phone number")
+            
+        query = select(PhoneNumber).where(
+            PhoneNumber.phone_number == phone_number
+        )
+        result = await db.execute(query)
+        user = result.scalar_one_or_none()
+        
+        if not user:
+            return {"is_activated": False}
+            
+        return {"is_activated": user.is_activated}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Status check failed", error=e)
+        raise HTTPException(status_code=500, detail="Status check failed")
+    
 def format_phone_number(phone_number: str) -> str:
     """Format phone number to consistent format with +1 prefix."""
     phone_number = (

@@ -307,7 +307,38 @@ class SearchService:
             query.category or ''
         ]
         return f"search:{':'.join(components)}"
+    # In app/api/v1/endpoints/search.py
 
+    @router.post("/rag_search")
+    async def rag_search(
+        request: Request,
+        search_service: SearchService = Depends(get_search_service),
+        db: AsyncSession = Depends(get_session)
+    ):
+        """Perform RAG search for items."""
+        try:
+            data = await request.json()
+            description = data.get("item_description")
+            
+            if not description:
+                raise HTTPException(status_code=400, detail="Missing item description")
+                
+            # Find similar items using vector search
+            similar_items = await search_service.find_similar_items(
+                query=description,
+                limit=1
+            )
+            
+            if not similar_items:
+                raise HTTPException(status_code=404, detail="No matching items found")
+                
+            return {"item_id": similar_items[0].id}
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error("RAG search failed", error=e)
+            raise HTTPException(status_code=500, detail="Search failed")
+        
     async def _track_search_analytics(
         self,
         query: SearchQuery,

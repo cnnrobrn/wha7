@@ -136,7 +136,46 @@ async def get_item(
     except Exception as e:
         logger.error("Failed to retrieve item", error=e, item_id=item_id)
         raise HTTPException(status_code=500, detail="Internal server error")
+# In app/api/v1/endpoints/items.py
+# In app/api/v1/endpoints/items.py
 
+@router.get("/items")
+async def get_outfit_items(
+    outfit_id: int = Query(...),
+    db: AsyncSession = Depends(get_session)
+):
+    """Get items for a specific outfit."""
+    try:
+        query = (
+            select(Item)
+            .options(selectinload(Item.links))
+            .where(Item.outfit_id == outfit_id)
+        )
+        
+        result = await db.execute(query)
+        items = result.scalars().all()
+        
+        return items
+    except Exception as e:
+        logger.error("Failed to get items", error=e)
+        raise HTTPException(status_code=500, detail="Failed to get items")
+    
+@router.get("/links")
+async def get_item_links(
+    item_id: int = Query(...),
+    db: AsyncSession = Depends(get_session)
+):
+    """Get shopping links for an item."""
+    try:
+        query = select(Link).where(Link.item_id == item_id)
+        result = await db.execute(query)
+        links = result.scalars().all()
+        
+        return links
+    except Exception as e:
+        logger.error("Failed to get links", error=e)
+        raise HTTPException(status_code=500, detail="Failed to get links")
+    
 @router.get("/search/similar", response_model=List[SimilarItemResponse])
 @monitor_performance("search_similar_items")
 async def search_similar_items(

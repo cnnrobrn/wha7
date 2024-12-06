@@ -43,3 +43,43 @@ async def get_fashion_advice(
             status_code=500,
             detail=f"Error processing fashion advice request: {str(e)}"
         )
+
+# In app/api/v1/endpoints/fashion.py
+
+@router.post("/ios/consultant")
+async def ios_consultant(
+    request: Request,
+    ai_service: AIService = Depends(get_ai_service),
+    db: AsyncSession = Depends(get_session)
+):
+    """Handle iOS consultant requests."""
+    try:
+        data = await request.json()
+        image_content = data.get("image_content")
+        text = data.get("text")
+        from_number = data.get("from_number")
+        
+        # Process with AI service
+        analysis = await ai_service.analyze_outfit_image(
+            image_data=image_content,
+            message_text=text
+        )
+        
+        # Format response for iOS
+        response = {
+            "response": analysis.get("style_description", ""),
+            "recommendations": [
+                {
+                    "Item": item["description"],
+                    "Amazon_Search": item.get("search", item["description"]),
+                    "Recommendation_ID": idx
+                }
+                for idx, item in enumerate(analysis.get("items", []), 1)
+            ]
+        }
+        
+        return response
+    except Exception as e:
+        logger.error("Consultant request failed", error=e)
+        raise HTTPException(status_code=500, detail="Request failed")
+
