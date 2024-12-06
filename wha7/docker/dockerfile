@@ -1,17 +1,14 @@
 # Use multi-stage build for optimized final image
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 
 # Set working directory
 WORKDIR /app
 
 # Install system dependencies required for building packages
-RUN apt-get update --fix-missing && \
-    apt-get upgrade -y && \
-    apt-get install -y \
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
     build-essential \
-    libpq-dev \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    libpq-dev
 
 # Install Python dependencies
 COPY requirements.txt .
@@ -29,14 +26,10 @@ ENV PYTHONUNBUFFERED=1 \
 WORKDIR /app
 
 # Install system dependencies
-RUN apt-get update --fix-missing && \
-    apt-get upgrade -y && \
-    apt-get install -y \
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libpq-dev \
-    ffmpeg \
-    build-essential \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    ffmpeg
 
 # Create and activate virtual environment
 RUN python -m venv /opt/venv
