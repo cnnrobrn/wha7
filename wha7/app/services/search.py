@@ -42,4 +42,30 @@ class SearchService:
         except Exception as e:
             logger.error("Similar item search failed", error=e)
             raise
+# app/services/search.py
 
+async def get_shopping_links(search_terms: str) -> List[Dict]:
+    """Get product links using Oxy."""
+    payload = {
+        'source': 'google_shopping_search',
+        'domain': 'com',
+        'query': search_terms
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            'https://realtime.oxylabs.io/v1/queries',
+            auth=(settings.OXY_USERNAME, settings.OXY_PASSWORD),
+            json=payload
+        )
+        
+        results = response.json()["results"][0]["content"]["organic"]
+        return [{
+            'title': item['title'],
+            'price': item['price_str'],
+            'url': item['url'],
+            'photo_url': item['thumbnail'],
+            'rating': item['rating'],
+            'reviews_count': item['reviews_count'],
+            'merchant_name': item['merchant']['name']
+        } for item in results[:30]]
