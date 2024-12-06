@@ -151,6 +151,40 @@ class SocialMediaService:
         except Exception as e:
             logger.error("Webhook processing failed", error=e)
             raise HTTPException(status_code=500, detail="Processing failed")
+    # app/services/social_media.py
+
+    async def process_reel(reel_url: str, message: InstagramMessage):
+        """Process Instagram reel with optimized frame sampling."""
+        frames = []
+        video = cv2.VideoCapture(reel_url)
+        fps = video.get(cv2.CAP_PROP_FPS)
+        frame_interval = int(fps * 2)  # Sample every 2 seconds
+        max_frames = 5
+        frame_count = 0
+        
+        while len(frames) < max_frames:
+            ret, frame = video.read()
+            if not ret:
+                break
+                
+            if frame_count % frame_interval == 0:
+                # Check if frame is unique using image similarity
+                if not frames or is_frame_unique(frame, frames[-1]):
+                    frames.append(frame)
+                    
+            frame_count += 1
+        
+        video.release()
+        
+        # Process unique frames
+        for frame in frames:
+            analysis = await ai_service.analyze_outfit_image(frame)
+            await store_outfit_analysis(analysis, message.sender)
+    
+    def is_frame_unique(new_frame, prev_frame, threshold=0.8):
+        """Check if frame is significantly different from previous."""
+        similarity = structural_similarity(new_frame, prev_frame, multichannel=True)
+        return similarity < threshold
     
     async def _process_message(
         self,
